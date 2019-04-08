@@ -5,7 +5,8 @@ logger = logging.getLogger('counter')
 class text_unification:
     # Only Textual Output
 
-    phrase_separators = [':', ';', ',', '!', '?', '\n', '- ', '\t', '.']
+    block_separators = ["\r",'\t','\n']
+    phrase_separators = [':', ';', ',', '!', '?', '- ', '.']
     words_in_phrase_separators = [' ']
 
     def unification(row_text):
@@ -122,9 +123,35 @@ class word():
         # Found Phrases - create words, add them to subwords
         # Found Words in Phrases, add them to subwords of Phrases and overall Subwords
 
-        if text_unification.split_check(self.unified_text,text_unification.words_in_phrase_separators+text_unification.phrase_separators):
 
-            for subphrase_word in text_unification.just_split(self.unified_text,text_unification.words_in_phrase_separators+text_unification.phrase_separators):
+        if text_unification.split_check(self.unified_text,text_unification.block_separators):
+            for submessage_block in text_unification.splitting(self.unified_text,text_unification.block_separators):
+                block=word.safe_create(submessage_block)
+                block.decompose()
+
+                if block.id not in self.__subwords:
+                    self.__subwords[block.id] = 1
+                    logger.debug(str(submessage_block) + " counted first time")
+                else:
+                    self.__subwords[block.id] += 1
+                    logger.debug(str(submessage_block) + " counted " + str(self.__subwords[block.id]) + " time")
+
+        elif text_unification.split_check(self.unified_text,text_unification.phrase_separators+text_unification.block_separators):
+            for submessage_phrase in text_unification.splitting(self.unified_text,text_unification.phrase_separators):
+                somephrase=word.safe_create(submessage_phrase)
+                somephrase.decompose()
+
+                if someword.id not in self.__subwords:
+                    self.__subwords[somephrase.id] = 1
+                    logger.debug(str(submessage_phrase) + " counted first time")
+                else:
+                    self.__subwords[somephrase.id] += 1
+                    logger.debug(str(submessage_phrase) + " counted " + str(self.__subwords[somephrase.id]) + " time")
+
+
+        elif text_unification.split_check(self.unified_text,text_unification.words_in_phrase_separators+text_unification.phrase_separators):
+
+            for subphrase_word in text_unification.just_split(self.unified_text,text_unification.words_in_phrase_separators):
                 someword=word.safe_create(text_unification.unification(subphrase_word))
 
                 if someword.id not in self.__subwords:
@@ -133,11 +160,6 @@ class word():
                 else:
                     self.__subwords[someword.id] += 1
                     logger.debug(str(subphrase_word) + " counted " + str(self.__subwords[someword.id]) + " time")
-
-        if text_unification.split_check(self.unified_text,text_unification.phrase_separators):
-            for submessage_phrase in text_unification.splitting(self.unified_text,text_unification.phrase_separators):
-                somephrase=word.safe_create(submessage_phrase)
-                somephrase.decompose()
 
         logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
 
