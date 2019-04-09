@@ -1,21 +1,33 @@
 import logging.config
 logger = logging.getLogger('counter')
 
-
 class text_unification:
     # Only Textual Output
 
-    block_separators = ["\r",'\t','\n']
-    phrase_separators = [':', ';', ',', '!', '?', '- ', '.']
+    #block_separators = ['\r','\t','\n']
+    block_separators = ['\n','\t','стаття','розділ']
+    sentense_separators = ['.','!','?']
+    phrase_separators = [':', ';', ',', '!', '?', '- ']
     words_in_phrase_separators = [' ']
+
+    separators=[block_separators,sentense_separators,phrase_separators,words_in_phrase_separators]
+
+    all_words_separator=[]
+    for separator in separators:
+        all_words_separator+=separator
 
     def unification(row_text):
         #change multiple spaces by 1 space
         #trim spaces before comas, dots etc.
 
+        #multicharacters=[' ','\n','\t']
+        #for character in multicharacters:
+        #    row_text=character.join(row_text.split(character))
 
-        text=row_text.strip()
-        return text
+        row_text=' '.join(row_text.split())
+        row_text=row_text.lower()
+
+        return row_text
 
     def split_check(unified_text, separators=[' ']):
         # check is pslitting required
@@ -75,6 +87,8 @@ class text_unification:
         simple_split=text_unification.just_split(unified_text,separators)
         subphrases_and_words = text_unification.just_combine(simple_split)
 
+        logger.debug("For word " + str(unified_text) + " identified such subwords: " + str(simple_split+subphrases_and_words))
+
         return simple_split+subphrases_and_words
 
 class word():
@@ -120,48 +134,26 @@ class word():
         self.__subwords = {}
         # word_ids, count
 
-        # Found Phrases - create words, add them to subwords
-        # Found Words in Phrases, add them to subwords of Phrases and overall Subwords
+        for separator in text_unification.separators:
+            if text_unification.split_check(self.unified_text, separator):
+                for submessage in text_unification.splitting(self.unified_text,separator):
+                    someword = word.safe_create(submessage)
 
+                    if someword.id not in self.__subwords:
+                        self.__subwords[someword.id] = 1
+                        logger.debug(str(someword.unified_text) + " counted first time")
+                    else:
+                        self.__subwords[someword.id] += 1
+                        logger.debug(str(someword.unified_text) + " counted " + str(self.__subwords[someword.id]) + " time")
 
-        if text_unification.split_check(self.unified_text,text_unification.block_separators):
-            for submessage_block in text_unification.splitting(self.unified_text,text_unification.block_separators):
-                block=word.safe_create(submessage_block)
-                block.decompose()
+                    someword.decompose()
+                    #msg.word_used_in_text(someword.unified_text)
 
-                if block.id not in self.__subwords:
-                    self.__subwords[block.id] = 1
-                    logger.debug(str(submessage_block) + " counted first time")
-                else:
-                    self.__subwords[block.id] += 1
-                    logger.debug(str(submessage_block) + " counted " + str(self.__subwords[block.id]) + " time")
+                break
 
-        elif text_unification.split_check(self.unified_text,text_unification.phrase_separators+text_unification.block_separators):
-            for submessage_phrase in text_unification.splitting(self.unified_text,text_unification.phrase_separators):
-                somephrase=word.safe_create(submessage_phrase)
-                somephrase.decompose()
+                #add to msg self_id
 
-                if someword.id not in self.__subwords:
-                    self.__subwords[somephrase.id] = 1
-                    logger.debug(str(submessage_phrase) + " counted first time")
-                else:
-                    self.__subwords[somephrase.id] += 1
-                    logger.debug(str(submessage_phrase) + " counted " + str(self.__subwords[somephrase.id]) + " time")
-
-
-        elif text_unification.split_check(self.unified_text,text_unification.words_in_phrase_separators+text_unification.phrase_separators):
-
-            for subphrase_word in text_unification.just_split(self.unified_text,text_unification.words_in_phrase_separators):
-                someword=word.safe_create(text_unification.unification(subphrase_word))
-
-                if someword.id not in self.__subwords:
-                    self.__subwords[someword.id] = 1
-                    logger.debug(str(subphrase_word) + " counted first time")
-                else:
-                    self.__subwords[someword.id] += 1
-                    logger.debug(str(subphrase_word) + " counted " + str(self.__subwords[someword.id]) + " time")
-
-        logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
+        #logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
 
         return self.__subwords.copy()
 
@@ -185,10 +177,13 @@ class message():
     def word_used_in_text(self,unified_text):
         someword=word.safe_create(unified_text)
 
-        if someword.id in self.__all_words.keys():
-            self.__all_words[someword.id]+=1
+        if someword.id in self.__allwords.keys():
+            self.__allwords[someword.id]+=1
         else:
-            self.__all_words[someword.id]=1
+            self.__allwords[someword.id]=1
+
+        logger.debug("Word " + str(unified_text) + " is used in " + str(self.text))
+        logger.debug("all messages:  " + str(self.__allwords))
 
     def print_all_words(self):
         logger.debug("Printing all messages")
@@ -197,8 +192,14 @@ class message():
         for (word_id, count) in self.__allwords.items():
             print(word_id,'\''+str(word.get_by_id(word_id).unified_text)+'\''," counted",count,"times")
 
+    def get_unified_text(self):
+        return text_unification.unification(self.text)
+
     def decompose(self):
         text_word=word.safe_create(self.text)
-        self.__allwords =text_word.decompose()
+        text_word.decompose()
+
+        for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
+            self.word_used_in_text(wordphrase)
 
 
