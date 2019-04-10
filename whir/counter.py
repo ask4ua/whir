@@ -1,14 +1,19 @@
 import logging.config
+
 logger = logging.getLogger('counter')
 
 class text_unification:
     # Only Textual Output
 
+
     #block_separators = ['\r','\t','\n']
-    block_separators = ['\n','\t','стаття','розділ']
-    sentense_separators = ['.','!','?']
-    phrase_separators = [':', ';', ',', '!', '?', '- ']
-    words_in_phrase_separators = [' ']
+
+    # [0] separator is used to add to the end of line for sure
+
+    block_separators = ['\n','\t']
+    sentense_separators = ['.','!','?','...'] + block_separators[0:1]
+    phrase_separators = [',',':', ';','- ','"','\(','\)','\{','\}','\[','\]'] + sentense_separators[0:1]
+    words_in_phrase_separators = [' '] + phrase_separators[0:1]
 
     separators=[block_separators,sentense_separators,phrase_separators,words_in_phrase_separators]
 
@@ -24,7 +29,8 @@ class text_unification:
         #for character in multicharacters:
         #    row_text=character.join(row_text.split(character))
 
-        row_text=' '.join(row_text.split())
+        ## In such case \n also hidden
+        #row_text=' '.join(row_text.split())
         row_text=row_text.lower()
 
         return row_text
@@ -40,7 +46,9 @@ class text_unification:
         return False
 
     def just_split(unified_text,separators):
-        logger.debug("Splitting text of some length: " + str(len(unified_text)) + " separators: " + str(separators))
+        length_for_splitting=len(unified_text)
+        logger.info("Simply splitting text of some length: " + str(length_for_splitting) + " with separators: " + str(separators))
+
 
         simple_split = []
         simple_split.append(unified_text)
@@ -56,15 +64,21 @@ class text_unification:
 
             simple_split = splitted_text_list.copy();
 
+        logger.info("Total subelements of simple split: " + str(len(simple_split)))
         return simple_split
 
         # now collected all cases
         # below also collecting it`s combinations
 
-    def just_combine(simple_split):
+    def just_combine(simple_split,separators):
+        logger.info("Combining text of such sublocks amount: " + str(len(simple_split)))
+
         subphrases_and_words=[]
+
+        counter=0
         for firstword in range(len(simple_split)):
             for lastword in range(firstword + 1, len(simple_split) + 1):
+            #for lastword in range(firstword, firstword + 2):
                 if firstword == 0 and lastword == len(simple_split):
                     # case when the all phrase identified like a subphrase should be excluded
                     continue
@@ -76,20 +90,29 @@ class text_unification:
                 subphrase = ""
                 for wordphrase_combination in simple_split[firstword:lastword]:
                     subphrase += str(wordphrase_combination)
-                    subphrase += " "
+                    subphrase += separators[0]
+                    pass
+
                 subphrase = subphrase[0:-1]
                 subphrases_and_words.append(subphrase)
+                counter+=1
+                logger.debug("Just Combine counter: " + str(counter))
+
+        logger.info("Total combinations: " + str(len(subphrases_and_words)))
 
         return subphrases_and_words
 
-    def splitting(unified_text,separators):
+    def full_splitting(unified_text, separators):
 
-        simple_split=text_unification.just_split(unified_text,separators)
-        subphrases_and_words = text_unification.just_combine(simple_split)
 
-        logger.debug("For word " + str(unified_text) + " identified such subwords: " + str(simple_split+subphrases_and_words))
+        simple_split = text_unification.just_split(unified_text, separators)
+        subphrases_and_words = text_unification.just_combine(simple_split, separators)
 
-        return simple_split+subphrases_and_words
+
+        logger.debug(
+            "For word " + str(unified_text) + " identified such subwords: " + str(simple_split + subphrases_and_words))
+
+        return simple_split + subphrases_and_words
 
 class word():
     #list all: text: word_obj
@@ -98,13 +121,26 @@ class word():
     __all_ids={}
     #id - object_link
 
+    @staticmethod
+    def id(text="",unified_text=""):
+
+        if unified_text != "":
+            return hash(text_unification.unification(unified_text))
+        else:
+            return hash(unified_text)
+
     def __init__(self,text):
         self.unified_text = text_unification.unification(text)
-        self.id=hash(self.unified_text)
+        self.id=word.id(unified_text=self.unified_text)
+
+        self.type=""
 
         word.__all_ids[self.id]=self
 
         self.__subwords = {}
+        # subword_id, cound
+
+        self.decomposed_flag=False
 
         logger.debug("hash: \'"+ str(self.id) + "\' word " + self.unified_text + " created")
 
@@ -114,6 +150,7 @@ class word():
     def set_db_sync(self,db_sync=True):
         self.__db_sync=db_sync
 
+    @staticmethod
     def safe_create(text):
         id=hash(text_unification.unification(text))
 
@@ -134,45 +171,90 @@ class word():
         self.__subwords = {}
         # word_ids, count
 
+        decomposing_level=0
         for separator in text_unification.separators:
-            if text_unification.split_check(self.unified_text, separator):
-                for submessage in text_unification.splitting(self.unified_text,separator):
+            if text_unification.split_check(self.unified_text,separators=separator):
+
+                if decomposing_level==0:
+                    submessages=text_unification.just_split(self.unified_text,separator)
+                    self.type='blok'
+
+                elif decomposing_level==1:
+                    submessages = text_unification.full_splitting(self.unified_text, separator)
+                    self.type = 'sentense'
+
+                elif decomposing_level==2:
+                    submessages = text_unification.full_splitting(self.unified_text, separator)
+                    self.type = 'phrase'
+
+                elif decomposing_level==3:
+                    submessages = text_unification.full_splitting(self.unified_text, separator)
+                    self.type='word'
+
+                else:
+                    submessages = text_unification.full_splitting(self.unified_text, separator)
+                    logger.warning("Text not identified as blok, sentense, phrase or word!")
+
+
+                for submessage in submessages:
+
+                    # if some text block already in db - no sence to decompose it for the 2-nd time!
                     someword = word.safe_create(submessage)
 
                     if someword.id not in self.__subwords:
                         self.__subwords[someword.id] = 1
-                        logger.debug(str(someword.unified_text) + " counted first time")
+                        logger.debug(str(someword.unified_text) + " counted first time inside " + str(self.unified_text))
                     else:
                         self.__subwords[someword.id] += 1
-                        logger.debug(str(someword.unified_text) + " counted " + str(self.__subwords[someword.id]) + " time")
+                        logger.debug(str(someword.unified_text) + " counted " + str(self.__subwords[someword.id]) + " time inside " + str(self.unified_text))
 
-                    someword.decompose()
+                    if not someword.decomposed_flag:
+                        someword.decompose()
                     #msg.word_used_in_text(someword.unified_text)
 
+                #logger.info("Finished decomposing of word of such lenght:" + str(len(self.unified_text)))
                 break
 
                 #add to msg self_id
 
-        #logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
+        self.decomposed_flag = True
+        decomposing_level +=1
 
-        return self.__subwords.copy()
+        #logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
 
 
     #subword is only linking to existing words
     #counting performed under message
 
+    def getsubwords(self):
+        return self.__subwords
+
+    @staticmethod
+    def print_all_words():
+        for someword in word.__all_ids.values():
+            print(someword.unified_text + " of type" + str(someword.type) + "reusing such words:" + str(len(someword.getsubwords())))
+            #for subword_id,count in someword.getsubwords().items():
+            #    subword=word.get_by_id(subword_id)
+            #    print(" - " + str(subword.unified_text) + " used " + str(count) + " times")
 
 class message():
+    __all_messages=[]
+
     def __init__(self,text,language=""):
         self.__allwords = {}
         self.text=text
 
         # word_id : count usages
+        message.__all_messages.append(self)
 
         self.date_creation = None
         self.language=""
 
         self.decomposed=False
+
+    @staticmethod
+    def get_all_messages():
+        return message.__all_messages
 
     def word_used_in_text(self,unified_text):
         someword=word.safe_create(unified_text)
@@ -182,8 +264,7 @@ class message():
         else:
             self.__allwords[someword.id]=1
 
-        logger.debug("Word " + str(unified_text) + " is used in " + str(self.text))
-        logger.debug("all messages:  " + str(self.__allwords))
+        logger.debug("Word " + str(unified_text) + " registered as used in " + str(self.text))
 
     def print_all_words(self):
         logger.debug("Printing all messages")
@@ -199,7 +280,9 @@ class message():
         text_word=word.safe_create(self.text)
         text_word.decompose()
 
-        for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
-            self.word_used_in_text(wordphrase)
+        self.decomposed=True
+
+        #for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
+        #    self.word_used_in_text(wordphrase)
 
 
