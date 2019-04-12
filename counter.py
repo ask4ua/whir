@@ -5,9 +5,6 @@ import yaml
 import whir.counter as whir
 from whir.db import db
 
-import logging.config
-logging.config.fileConfig('conf/logging.conf')
-logger = logging.getLogger('root')
 
 class Configs:
     actual_config={}
@@ -21,49 +18,65 @@ class Configs:
 
         Configs.actual_config = cfg[cfg['actual']]
 
-Configs.load(logger)
+def get_texts():
 
-db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'], host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'], database=Configs.actual_config['db_database'])
-#db_session.load_all_from_db()
+    def read_text_from_file(filename):
+
+        text=""
+        try:
+            logger.debug("Starting reading TEXT from file")
+            streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
+            # cnt=0
+            # ch=streamTextFile.read(1)
+            # while ch!='':
+            #    TEXT+=ch
+
+            text = streamTextFile.read()
+
+            logger.info("File " + str(filename) + " read - closing it")
+            streamTextFile.close()
+
+        except Exception as exc:
+            print("File " + filename + "operations failed with exception:", os.strerror(exc.errno))
+
+        return text
+
+    directory = os.fsencode("./texts/")
+
+    for file in os.listdir(directory):
+         filename = os.fsdecode(file)
+         if filename.endswith(".txt"):
+             message = whir.message(read_text_from_file("./texts/"+filename))
+             logger.debug("Read file: " + filename)
+         else:
+             continue
+
+def analyze():
+    for somemessage in whir.message.get_all_messages():
+        if not somemessage.decomposed:
+            somemessage.decompose()
 
 
+def sync_to_db():
+    pass
 
+if __name__=='__main__':
+    import logging.config
+    logging.config.fileConfig('conf/logging.conf')
+    logger = logging.getLogger('root')
 
+    Configs.load(logger)
 
+    get_texts()
+    analyze()
 
-def read_text_from_file(filename):
-    try:
-        logger.debug("Starting reading TEXT from file")
-        streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
-        # cnt=0
-        # ch=streamTextFile.read(1)
-        # while ch!='':
-        #    TEXT+=ch
+    logger.info("DB starting save to DB")
+    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
+                    database=Configs.actual_config['db_database'])
 
-        text = streamTextFile.read()
-
-        logger.info("File " + str(filename) + " read - closing it")
-        streamTextFile.close()
-
-    except Exception as exc:
-        print("File " + filename + "operations failed with exception:", os.strerror(exc.errno))
-
-    return text
-
-
-
-directory = os.fsencode("./")
-
-for file in os.listdir(directory):
-     filename = os.fsdecode(file)
-     if filename.endswith(".txt"):
-         message = whir.message(read_text_from_file(filename))
-     else:
-         continue
-
-for somemessage in whir.message.get_all_messages():
-    somemessage.decompose()
-
-whir.word.print_all_words()
+    db_session.sync_all_to_db()
+    db_session.close_db()
+    logger.info("DB save finished")
 
 logger.info("Job is done")

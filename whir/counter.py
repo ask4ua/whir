@@ -1,6 +1,9 @@
 import logging.config
-
 logger = logging.getLogger('counter')
+
+
+import hashlib
+
 
 class text_unification:
     # Only Textual Output
@@ -47,7 +50,7 @@ class text_unification:
 
     def just_split(unified_text,separators):
         length_for_splitting=len(unified_text)
-        logger.info("Simply splitting text of some length: " + str(length_for_splitting) + " with separators: " + str(separators))
+        logger.debug("Simply splitting text of some length: " + str(length_for_splitting) + " with separators: " + str(separators))
 
 
         simple_split = []
@@ -64,7 +67,7 @@ class text_unification:
 
             simple_split = splitted_text_list.copy();
 
-        logger.info("Total subelements of simple split: " + str(len(simple_split)))
+        logger.debug("Total subelements of simple split: " + str(len(simple_split)))
         return simple_split
 
         # now collected all cases
@@ -122,20 +125,19 @@ class word():
     #id - object_link
 
     @staticmethod
-    def id(text="",unified_text=""):
+    def id(unified_text="",text=""):
 
         if unified_text != "":
-            return hash(text_unification.unification(unified_text))
+            return hashlib.sha256(unified_text.encode()).hexdigest()
         else:
-            return hash(unified_text)
+            return hashlib.sha256(text_unification.unification(text).encode()).hexdigest()
 
-    def __init__(self,text):
+    def __init__(self, text):
         self.unified_text = text_unification.unification(text)
-        self.id=word.id(unified_text=self.unified_text)
+        self.id = word.id(unified_text=self.unified_text)
 
         self.type=""
-
-        word.__all_ids[self.id]=self
+        word.__all_ids[self.id] = self
 
         self.__subwords = {}
         # subword_id, cound
@@ -145,7 +147,10 @@ class word():
         logger.debug("hash: \'"+ str(self.id) + "\' word " + self.unified_text + " created")
 
     def return_subwords(self):
-        return self.__subwords.copy()
+        if len(self.__subwords) != 0:
+            return self.__subwords.copy()
+        else:
+            return False
 
     def set_db_sync(self,db_sync=True):
         self.__db_sync=db_sync
@@ -161,11 +166,31 @@ class word():
 
         return entity
 
+    @staticmethod
     def get_by_id(id):
+
         if id in word.__all_ids.keys():
             return word.__all_ids[id]
         else:
+            logger.warning("Requested id absenr in word all ids and != 0, id: ", str(id))
             return False
+
+    @staticmethod
+    def get_all_words_ids():
+        logger.info("Getting all word ids, total:" + str(len(word.__all_ids)))
+        return word.__all_ids.keys()
+
+    @staticmethod
+    def sort_by_subwords_and_get_word_ids():
+        #sort all word_ids from 0 subbowrds to maximum
+
+        logger.info("Getting all word ids, total:" + str(len(word.__all_ids)))
+        return word.__all_ids.keys()
+
+    @staticmethod
+    def get_all_words():
+        logger.info("Getting all words, total:" + str(len(word.__all_ids)))
+        return word.__all_ids.keys()
 
     def decompose(self):
         self.__subwords = {}
@@ -226,23 +251,21 @@ class word():
     #subword is only linking to existing words
     #counting performed under message
 
-    def getsubwords(self):
-        return self.__subwords
+    def get_subwords(self):
+        if len(self.__subwords) > 0:
+            return self.__subwords.items()
+        else:
+            return False
 
-    @staticmethod
-    def print_all_words():
-        for someword in word.__all_ids.values():
-            print(someword.unified_text + " of type" + str(someword.type) + "reusing such words:" + str(len(someword.getsubwords())))
-            #for subword_id,count in someword.getsubwords().items():
-            #    subword=word.get_by_id(subword_id)
-            #    print(" - " + str(subword.unified_text) + " used " + str(count) + " times")
 
 class message():
+    __all_ids={}
     __all_messages=[]
 
     def __init__(self,text,language=""):
-        self.__allwords = {}
         self.text=text
+
+        self.id=None
 
         # word_id : count usages
         message.__all_messages.append(self)
@@ -256,15 +279,16 @@ class message():
     def get_all_messages():
         return message.__all_messages
 
-    def word_used_in_text(self,unified_text):
-        someword=word.safe_create(unified_text)
+    @staticmethod
+    def get_by_id(id=0):
 
-        if someword.id in self.__allwords.keys():
-            self.__allwords[someword.id]+=1
+        if id == 0:
+            return message.__all_ids.keys()
+
+        elif id in message.__all_ids.keys():
+            return message.__all_ids[id]
         else:
-            self.__allwords[someword.id]=1
-
-        logger.debug("Word " + str(unified_text) + " registered as used in " + str(self.text))
+            return False
 
     def print_all_words(self):
         logger.debug("Printing all messages")
@@ -278,9 +302,15 @@ class message():
 
     def decompose(self):
         text_word=word.safe_create(self.text)
-        text_word.decompose()
+        self.id=text_word.id
+        self.unified_text=text_word.unified_text
 
+        message.__all_ids[self.id]=self
+
+        text_word.decompose()
         self.decomposed=True
+
+
 
         #for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
         #    self.word_used_in_text(wordphrase)

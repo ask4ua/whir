@@ -2,21 +2,40 @@ import mysql.connector
 import re
 import datetime
 
+from whir.counter import word
+from whir.counter import message
+
 from mysql.connector import errorcode
 
 import logging.config
-
-
 logger = logging.getLogger('db')
+
 
 class queries:
 
     @staticmethod
-    def to_null(element):
-        if element == '' or element == 0 or element is None:
-            return 'null'
-        else:
-            return "\'" + str(element) + "\'"
+    def masking(text):
+        masking_rules={
+            '\'':'\\\'',
+            '"':'\\\"',
+            '%':'\\%',
+            '(': '\\(',
+            ')': '\\)',
+            '[': '\\]',
+            '[': '\\]',
+
+        }
+
+        logger.debug("Text before masking:" + text)
+
+        for symbol,swap_symbol in masking_rules.items():
+            text=text.replace(symbol,swap_symbol)
+
+        logger.debug("Text after masking:" + text)
+
+        return text
+
+
 
     @staticmethod
     def sql_injection_protection(element):
@@ -31,14 +50,119 @@ class queries:
 
         return element
 
+    @staticmethod
+    def safe_word_create(word_id):
+        SQL = "insert into words (word_id) select \'" + str(word_id) + "\' from dual where not exists (select 1 from words where word_id = \'" + str(word_id) + "\');"
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def safe_message_create(message_id):
+        SQL = "insert into messages (message_id) select \'" + str(message_id) + "\' from dual where not exists (select 1 from messages where message_id = \'" + str(message_id) + "\');"
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def update_word(word_id, date):
+        someword=word.get_by_id(word_id)
+
+        SQL="update words set \
+            text= \'" + queries.masking(someword.unified_text[0:4000]) + "\', \
+            creation_date = \'" + str(date) + "\' \
+            where word_id=\'" + str(word_id) + "\';"
+
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def update_word_in_word(word_id):
+        someword=word.get_by_id(word_id)
+
+        SQL = "delete from wordsinword where mainword_id=" + str(word_id) + ";"
+        if someword.get_subwords():
+            SQL += "insert wordsinword (mainword_id,subword_id,count) values "
+            for subword_id,count in someword.get_subwords():
+                SQL += "(mainword_id=\'" + str(word_id) + "\', subword_id=\'" + str(subword_id) + "\', count=\'" + str(count) + "\'), "
+
+            SQL=SQL[0:-2]
+            SQL+=";"
+
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def update_message(message_id,date):
+        somemessage=message.get_by_id(message_id)
+
+        SQL="update messages set \
+            text= \'" + queries.masking(somemessage.unified_text[0:4000]) + "\', \
+            creation_date = \'" + str(date) + "\' \
+            where message_id=\'" + str(message_id) + "\';"
+
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
 
 class db_parser:
+
     @staticmethod
     def force_utf8mb4(cursor):
-        cursor.execute('SET NAMES utf8mb4')
-        cursor.execute("SET CHARACTER SET utf8mb4")
-        cursor.execute("SET character_set_connection=utf8mb4")
+        cursor.execute('SET NAMES utf8mb4;')
+        cursor.execute("SET CHARACTER SET utf8mb4;")
+        cursor.execute("SET character_set_connection=utf8mb4;")
 
+    @staticmethod
+    def sync_all_words_to_db(sql_session, date):
+
+        logger.debug("Staring saving all words to db")
+
+        SQL = ""
+
+        cursor = sql_session.cursor()
+        db_parser.force_utf8mb4(cursor)
+
+        for word_id in word.sort_by_subwords_and_get_word_ids():
+            SQL=""
+
+            cursor.execute(queries.safe_word_create(word_id))
+            cursor.execute(queries.update_word(word_id, date))
+            cursor.execute(queries.update_word_in_word(word_id),multi=True)
+
+        sql_session.commit()
+
+        cursor.close()
+
+
+
+        #cursor = sql_session.cursor()
+        ##
+        #cursor.execute(SQL)
+        #sql_session.commit()
+
+
+        return SQL
+
+    @staticmethod
+    def sync_all_messages_to_db(sql_session,date):
+
+        SQL = ""
+
+        cursor = sql_session.cursor()
+        db_parser.force_utf8mb4(cursor)
+
+        for message_id in message.get_by_id():
+            cursor.execute(queries.safe_message_create(message_id))
+            cursor.execute(queries.update_message(message_id, date))
+
+        logger.info("SQL for sync_all_words_to_db length:" + str(len(SQL)))
+
+
+
+        #cursor.execute(SQL, multi=True)
+        sql_session.commit()
+
+        cursor.close()
+        return SQL
 
 
 class db:
@@ -59,84 +183,13 @@ class db:
             else:
                 logger.error(err)
 
-
-    def load_orders_from_db(self):
-        db_parser.create_orders(self.sql_session)
-
-    def sync_user_to_db(self, user_id):
-        db_parser.safe_user_to_db(self.sql_session, user_id)
-
-    def sync_cart_to_db(self, chat_id):
-        db_parser.safe_cart_create(self.sql_session, chat_id)
-        db_parser.sync_cart_to_db(self.sql_session, chat_id)
-        db_parser.update_cart_products_to_db(self.sql_session, chat_id)
-
-        cart.set_synced_to_db(chat_id)
-
-    def sync_chat_to_db(self, chat_id):
-        db_parser.safe_cart_create(self.sql_session, chat_id)
-        db_parser.update_chat_last_menu_msg_to_db(self.sql_session, chat_id)
-
-
-    def sync_order_to_db(self, order_id):
-        db_parser.safe_order_to_db(self.sql_session, order_id)
-        db_parser.update_products_in_order_to_db(self.sql_session, order_id)
-
-    def sync_tracked_response_to_db(self, response):
-        db_parser.safe_tracked_response_to_db(self.sql_session, response)
-
-    def sync_chat_tracked_responses_to_db(self, chat_id):
-        db_parser.safe_chat_tracked_responses_to_db(self.sql_session, chat_id)
-
-    def load_chats_from_db(self):
-        db_parser.create_chats(self.sql_session)
-
-    def load_tracked_response(self,limit=1000):
-        db_parser.load_tracked_response(self.sql_session,limit)
-
-    def load_some_orders_from_db(self, chat_id=None, order_id=None):
-        db_parser.recreate_orders(self.sql_session, chat_id, order_id)
-
-    def load_some_users_from_db(self,user_id=None):
-        db_parser.recreate_users(self.sql_session,user_id)
-
-    def load_some_carts_from_db(self,chat_id=None):
-        db_parser.recreate_carts(self.sql_session,chat_id)
-
-    def load_products_from_db(self):
-        db_parser.create_products(self.sql_session)
-        db_parser.create_productgroups(self.sql_session)
-
-    def sync_notifications_to_db(self, notification_obj):
-        db_parser.sync_notifications_to_db(self.sql_session, notification_obj)
-
-    def load_all_from_db(self):
-        db_parser.create_users(self.sql_session)
-        db_parser.create_products(self.sql_session)
-        db_parser.create_productgroups(self.sql_session)
-
-        db_parser.create_carts(self.sql_session)
-        db_parser.create_orders(self.sql_session)
-        #orders are parsed from DB to keep order_id uniquenesss
-
-        db_parser.create_discounts(self.sql_session)
-
-        db_parser.create_stickers(self.sql_session)
-        db_parser.create_chats(self.sql_session)
-
     def sync_all_to_db(self):
-        for user_id in user.list_users.keys():
-            self.sync_user_to_db(user_id)
+        time_now = datetime.datetime.now()
+        date = time_now.strftime('%Y-%m-%d %H:%M:%S')
 
-        for chat_id in cart.list_chats.keys():
-            self.sync_cart_to_db(chat_id)
+        db_parser.sync_all_words_to_db(self.sql_session,date)
+        db_parser.sync_all_messages_to_db(self.sql_session,date)
 
-        for order_id in order.list_orders.keys():
-            self.sync_cart_to_db(order_id)
-
-    def log(self,msg):
-        db_parser.create_log_record(self.sql_session,msg)
-        pass
 
     def close_db(self):
         self.sql_session.close()
