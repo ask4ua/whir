@@ -125,16 +125,18 @@ class word():
     #id - object_link
 
     @staticmethod
-    def id(unified_text="",text=""):
+    def calc_id(unified_text="",text=""):
 
         if unified_text != "":
-            return hashlib.sha256(unified_text.encode()).hexdigest()
+            text_to_encode=unified_text[:]
+            return hashlib.sha256(text_to_encode.encode()).hexdigest()
         else:
-            return hashlib.sha256(text_unification.unification(text).encode()).hexdigest()
+            text_to_encode=text_unification.unification(text)[:]
+            return hashlib.sha256(text_to_encode.encode()).hexdigest()
 
     def __init__(self, text):
         self.unified_text = text_unification.unification(text)
-        self.id = word.id(unified_text=self.unified_text)
+        self.id = word.calc_id(unified_text=self.unified_text)
 
         self.type=""
         word.__all_ids[self.id] = self
@@ -157,7 +159,7 @@ class word():
 
     @staticmethod
     def safe_create(text):
-        id=hash(text_unification.unification(text))
+        id=word.calc_id(text=text)
 
         if id in word.__all_ids.keys():
             entity = word.__all_ids[id]
@@ -172,25 +174,25 @@ class word():
         if id in word.__all_ids.keys():
             return word.__all_ids[id]
         else:
-            logger.warning("Requested id absenr in word all ids and != 0, id: ", str(id))
+            logger.warning("Requested id absent in word all ids and != 0, id: " + str(id))
             return False
 
     @staticmethod
     def get_all_words_ids():
-        logger.info("Getting all word ids, total:" + str(len(word.__all_ids)))
+        logger.debug("Getting all word ids, total:" + str(len(word.__all_ids)))
         return word.__all_ids.keys()
 
     @staticmethod
     def sort_by_subwords_and_get_word_ids():
         #sort all word_ids from 0 subbowrds to maximum
 
-        logger.info("Getting all word ids, total:" + str(len(word.__all_ids)))
+        logger.debug("Getting all word ids, total:" + str(len(word.__all_ids)))
         return word.__all_ids.keys()
 
     @staticmethod
     def get_all_words():
-        logger.info("Getting all words, total:" + str(len(word.__all_ids)))
-        return word.__all_ids.keys()
+        logger.debug("Getting all words, total:" + str(len(word.__all_ids)))
+        return word.__all_ids.values()
 
     def decompose(self):
         self.__subwords = {}
@@ -226,7 +228,7 @@ class word():
                     # if some text block already in db - no sence to decompose it for the 2-nd time!
                     someword = word.safe_create(submessage)
 
-                    if someword.id not in self.__subwords:
+                    if someword.id not in self.__subwords.keys():
                         self.__subwords[someword.id] = 1
                         logger.debug(str(someword.unified_text) + " counted first time inside " + str(self.unified_text))
                     else:
@@ -252,10 +254,7 @@ class word():
     #counting performed under message
 
     def get_subwords(self):
-        if len(self.__subwords) > 0:
-            return self.__subwords.items()
-        else:
-            return False
+        return self.__subwords.items()
 
 
 class message():

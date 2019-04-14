@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import yaml
+import sys
 
 import whir.counter as whir
 from whir.db import db
@@ -41,15 +42,19 @@ def get_texts():
 
         return text
 
-    directory = os.fsencode("./texts/")
+    for filename in sys.argv[1:]:
+        logger.debug("Input file: " + filename)
+        message = whir.message(read_text_from_file(filename))
 
-    for file in os.listdir(directory):
-         filename = os.fsdecode(file)
-         if filename.endswith(".txt"):
-             message = whir.message(read_text_from_file("./texts/"+filename))
-             logger.debug("Read file: " + filename)
-         else:
-             continue
+
+    #directory = os.fsencode("./texts/")
+    #for file in os.listdir(directory):
+    #     filename = os.fsdecode(file)
+    #     if filename.endswith(".txt"):
+    #         message = whir.message(read_text_from_file("./texts/"+filename))
+    #         logger.debug("Read file: " + filename)
+    #     else:
+    #         continue
 
 def analyze():
     for somemessage in whir.message.get_all_messages():
@@ -67,7 +72,10 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
+    logger.info("Starting collecting texts")
     get_texts()
+
+    logger.info("Starting Analysis")
     analyze()
 
     logger.info("DB starting save to DB")
@@ -76,7 +84,9 @@ if __name__=='__main__':
                     database=Configs.actual_config['db_database'])
 
     db_session.sync_all_to_db()
+    db_session.check_sync()
+
     db_session.close_db()
-    logger.info("DB save finished")
+    logger.info("DB consistency check finished")
 
 logger.info("Job is done")
