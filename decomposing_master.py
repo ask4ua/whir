@@ -2,6 +2,7 @@ import yaml
 #from docker import Client as DockerClient
 from whir.db import db
 import os
+import time
 
 class Configs:
     actual_config={}
@@ -28,11 +29,17 @@ not_decomposed_list=db_session.get_not_decomposed_messages()
 
 if len(not_decomposed_list)>0:
 
+    cnt=0
+    limit=100
     for file in not_decomposed_list:
         logger.info("Command to start docker, file:" + str(file))
         os.system("nohup docker run --volumes-from whir-data --rm ubuntu1804py3 python3 decompose_messages.py " + str(file) +" &")
         #os.system("docker run -v /Users/volk/Downloads/txt/:/data -v /Users/volk/GIT/whir/:/app --rm ubuntu18.04py3 ls ./")
-
+        
+        cnt+=1
+        if cnt >= limit:
+            time.sleep(3600)
+            logger.info(str(limit) + " containers started - sleeping for 1 hout to start next 10")
 
 db_session.close_db()
 
