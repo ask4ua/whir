@@ -350,7 +350,7 @@ class db_parser:
 
             except mysql.connector.Error as err:
                 logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__() + " " + str(err.errno)))
-                logger.warning("SQL: " + str(cursor.statement)
+                logger.warning("SQL: " + str(cursor.statement))
                 cursor.close()
                 return False
 
