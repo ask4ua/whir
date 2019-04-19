@@ -29,10 +29,9 @@ def read_text_from_file(filename,logger):
     text=""
     #try:
     logger.debug("Starting reading TEXT from file")
-
+        
     try:
         streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
-
         ch="Start"
         while ch != '':
             try:
@@ -45,15 +44,13 @@ def read_text_from_file(filename,logger):
                 continue
 
     except BaseException as exc:
-        logger.warning("File " + filename + " cannot read with exception: " + os.strerror(exc.errno))
+        try:
+            logger.warning("File " + filename + " cannot read with exception: " + os.strerror(exc.errno))
+        except:
+            logger.warning("File " + filename + " cannot read with exception. No error number ")
     else:
         logger.info("File " + str(filename) + " read - closing it")
         streamTextFile.close()
-        #text = streamTextFile.read()
-
-
-        #except Exception as exc:
-        #    print("File " + filename + "operations failed with exception:", os.strerror(exc.errno))
 
     return text
 
@@ -81,8 +78,12 @@ def parse_message(author,source,filename,logger):
     logger.info("Author: " + author + " hash: " + message.author_id)
     logger.info("Source: " + source + " hash: " + message.source_id)
 
-    os.system("rm -rf " + filename)
-    logger.info("Sorce File removed; " + filename)
+    try:
+        os_filename=filename.replace(" ","\\ ")
+        os.system("rm -rf " + os_filename)
+        logger.info("Sorce File removed; " + filename)
+    except:
+        logger.warning("Source File wasn`t removed")
 
     message.filename = "/data/HASHED/" + message.id + ".txt"
     write_text_to_file(message.filename, message.text, logger)
