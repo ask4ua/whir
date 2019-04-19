@@ -1,10 +1,13 @@
 import mysql.connector
 import re
 import datetime
+import random
 
 
 from whir.counter import word
 from whir.counter import message
+from whir.counter import source
+from whir.counter import author
 
 from mysql.connector import errorcode
 
@@ -53,6 +56,23 @@ class queries:
         return element
 
     @staticmethod
+    def get_not_decomposed_message_files():
+        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null"
+        return SQL
+
+    @staticmethod
+    def safe_author_create(author_id):
+        SQL = "insert into authors (author_id) select \'" + str(author_id) + "\' from dual where not exists (select 1 from authors where author_id = \'" + str(author_id) + "\');"
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def safe_source_create(source_id):
+        SQL = "insert into sources (source_id) select \'" + str(source_id) + "\' from dual where not exists (select 1 from sources where source_id = \'" + str(source_id) + "\');"
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
     def safe_word_create(word_id):
         SQL = "insert into words (word_id) select \'" + str(word_id) + "\' from dual where not exists (select 1 from words where word_id = \'" + str(word_id) + "\');"
         logger.debug("SQL: " + str(SQL))
@@ -65,11 +85,34 @@ class queries:
         return SQL
 
     @staticmethod
+    def update_author(author_id, date):
+
+        someauthor = author.get_by_id(author_id)
+
+        SQL = "update authors set \
+                author_name= \'" + queries.masking(someauthor.name) + "\' \
+                where author_id=\'" + str(author_id) + "\';"
+
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
+    def update_source(source_id, date):
+        somesource = source.get_by_id(source_id)
+
+        SQL = "update sources set \
+                source_name= \'" + queries.masking(somesource.name) + "\' \
+                where source_id=\'" + str(source_id) + "\';"
+
+        logger.debug("SQL: " + str(SQL))
+        return SQL
+
+    @staticmethod
     def update_word(word_id, date):
         someword=word.get_by_id(word_id)
 
         SQL="update words set \
-            text= \'" + queries.masking(someword.unified_text[0:4000]) + "\', \
+            text= \'" + queries.masking(someword.unified_text[0:255]) + "\', \
             creation_date = \'" + str(date) + "\' \
             where word_id=\'" + str(word_id) + "\';"
 
@@ -95,7 +138,7 @@ class queries:
         SQL = "insert into words (word_id, text, creation_date) values"
         for someword_id in word_ids:
             someword=word.get_by_id(someword_id)
-            SQL+="(\'" + str(someword.id) + "\', \'" + queries.masking(someword.unified_text[0:4000]) + "\', \'" + str(date) + "\'), "
+            SQL+="(\'" + str(someword.id) + "\', \'" + queries.masking(someword.unified_text[0:255]) + "\', \'" + str(date) + "\'), "
 
         SQL = SQL[0:-2]
         SQL += ";"
@@ -109,13 +152,20 @@ class queries:
         return SQL
 
     @staticmethod
-    def insert_word_in_word(word_id):
-        someword = word.get_by_id(word_id)
+    def insert_word_in_word(word_ids):
         SQL=""
-        if someword.get_subwords():
+
+        wordsinword_list=[]
+        for word_id in word_ids:
+            someword = word.get_by_id(word_id)
+            if someword.get_subwords():
+                for subword_id, count in someword.get_subwords():
+                    wordsinword_list.append([str(word_id),str(subword_id),str(count)])
+
+        if len(wordsinword_list) > 0:
             SQL += "insert into wordsinword (mainword_id,subword_id,count) values "
-            for subword_id,count in someword.get_subwords():
-                SQL += "(\'" + str(word_id) + "\', \'" + str(subword_id) + "\', \'" + str(count) + "\'), "
+            for record in wordsinword_list:
+                SQL += "(\'" + record[0] + "\', \'" + record[1] + "\', \'" + record[2] + "\'), "
 
             SQL=SQL[0:-2]
             SQL+=";"
@@ -150,8 +200,17 @@ class queries:
         somemessage=message.get_by_id(message_id)
 
         SQL="update messages set \
-            text= \'" + queries.masking(somemessage.unified_text[0:4000]) + "\', \
-            creation_date = \'" + str(date) + "\' \
+            text= \'" + queries.masking(somemessage.unified_text[0:255]) + "\',"
+
+        if somemessage.author_id!="":
+            SQL += "author_id = \'" + str(somemessage.author_id) + "\',"
+        if somemessage.source_id!="":
+            SQL += "source_id = \'" + str(somemessage.source_id) + "\',"
+
+        if somemessage.source_id!="":
+            SQL += "filename = \'" + str(somemessage.filename) + "\',"
+
+        SQL+="creation_date = \'" + str(date) + "\' \
             where message_id=\'" + str(message_id) + "\';"
 
         logger.debug("SQL: " + str(SQL))
@@ -261,7 +320,7 @@ class db_parser:
 
 
         def write_word_to_db(new_word_ids,sql_session,date):
-            logger.info("Starting words only to DB")
+            logger.info("Starting words to DB")
 
             cursor = sql_session.cursor()
             db_parser.force_utf8mb4(cursor)
@@ -269,57 +328,57 @@ class db_parser:
             # in such case repeat new words and try again
 
             try:
-                cursor.execute(queries.insert_words(new_word_ids, date))
+                limit=10
+                counter=0
+                for word_id in new_word_ids:
+                    #cursor.execute(queries.insert_words([word_id], date))
+                    cursor.execute(queries.delete_words([word_id]))
+                    cursor.execute(queries.insert_words([word_id], date))
 
-            except mysql.connector.Error as err:
-                logger.warning("Retrying procedure of defining new words while catched: " + str(err.__str__() + " " + str(err.errno)))
-                cursor.close()
-                time.sleep(10)
+                    #cursor.execute(queries.insert_word_in_word([word_id]))
+                    cursor.execute(queries.delete_wordsinword(word_id))
+                    cursor.execute(queries.insert_word_in_word([word_id]))
 
-                return False
-            else:
+                    counter+=1
+
+                    if counter>=limit:
+                        sql_session.commit()
+                        counter=counter-limit
                 sql_session.commit()
                 cursor.close()
                 return True
 
-        def write_wordsinword_to_db(new_word_ids,sql_session):
-            logger.info("Starting wordsinword to DB")
-            cursor = sql_session.cursor()
-            db_parser.force_utf8mb4(cursor)
+            except mysql.connector.Error as err:
+                logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__() + " " + str(err.errno)))
+                cursor.close()
+                return False
 
-            for word_id in new_word_ids:
-                cursor.execute(queries.insert_word_in_word(word_id))
-
-            sql_session.commit()
-            cursor.close()
-
-            return True
 
         words_synced=False
         all_word_ids = word.get_all_words_ids()
 
+        WAIT_TIMER = 10
         while not words_synced:
-            new_word_ids=get_new_words(all_word_ids,sql_session)
+            new_word_ids = get_new_words(all_word_ids, sql_session)
+
             logger.info("Total words in this run: " + str(len(all_word_ids)) + ", new word_ids : " + str(len(new_word_ids)))
 
             if len(new_word_ids) == 0:
+                logger.info("0 word_ids identified to insert")
                 break
             else:
                 logger.info("Starting writing to DB all new words")
+                if write_word_to_db(new_word_ids,sql_session,date):
+                    break
 
-                words_synced = write_word_to_db(new_word_ids,sql_session,date)
-                if not words_synced:
-                    continue
+                WAIT_TIMER += random.randint(1, 60)
+                logger.info("Starting waiting timer for " + str(WAIT_TIMER) + " seconds.")
+                time.sleep(WAIT_TIMER)
 
-                words_synced = write_wordsinword_to_db(new_word_ids, sql_session)
-
-
-
-            #consistence check:
 
     @staticmethod
     def check_save_consistency_words(sql_session):
-        WAIT_TIMER=5 #minutes
+        WAIT_TIMER=60 #seconds
 
         app_subwords_count=0
         for someword in word.get_all_words():
@@ -328,7 +387,6 @@ class db_parser:
 
         check_status=False
         all_word_ids = word.get_all_words_ids()
-
         while not check_status:
 
             db_subwords_count = -1
@@ -351,10 +409,42 @@ class db_parser:
 
             else:
                 logger.error("FAILED DB Consistency check: db subwords=" + str(db_subwords_count) + " and app subowrds = " + str(app_subwords_count))
-                logger.error("Waiting for " + str(WAIT_TIMER) +" minutes - and rechecking again - possibly some other sessions have not finished!")
+                WAIT_TIMER+=random.randint(1,120)
+                logger.error("Waiting for " + str(WAIT_TIMER) +" seconds - and rechecking again - possibly some other sessions have not finished!")
 
-                time.sleep(WAIT_TIMER*60)
+                time.sleep(WAIT_TIMER)
 
+
+    @staticmethod
+    def sync_all_authors_to_db(sql_session,date):
+
+        logger.info("Starting creating in DB Authors")
+        cursor = sql_session.cursor()
+        db_parser.force_utf8mb4(cursor)
+
+        for author_id in author.get_all_ids():
+            cursor.execute(queries.safe_author_create(author_id))
+            cursor.execute(queries.update_author(author_id, date))
+
+        sql_session.commit()
+
+        cursor.close()
+
+
+    @staticmethod
+    def sync_all_sources_to_db(sql_session,date):
+
+        logger.info("Starting creating in DB Sources")
+        cursor = sql_session.cursor()
+        db_parser.force_utf8mb4(cursor)
+
+        for source_id in source.get_all_ids():
+            cursor.execute(queries.safe_source_create(source_id))
+            cursor.execute(queries.update_source(source_id, date))
+
+        sql_session.commit()
+
+        cursor.close()
 
     @staticmethod
     def sync_all_messages_to_db(sql_session,date):
@@ -371,6 +461,22 @@ class db_parser:
 
         cursor.close()
 
+    @staticmethod
+    def get_not_decomposed_messages(sql_session):
+        not_decomposed_list=[]
+
+        logger.info("Starting lookup in DB for not decomposed messages")
+        cursor = sql_session.cursor()
+        db_parser.force_utf8mb4(cursor)
+        cursor.execute(queries.get_not_decomposed_message_files())
+
+        for somefile in cursor:
+            not_decomposed_list.append(somefile[0])
+
+        logger.debug("All not decomposed files:" + str(not_decomposed_list))
+        cursor.close()
+
+        return not_decomposed_list
 
 class db:
 
@@ -394,11 +500,25 @@ class db:
         time_now = datetime.datetime.now()
         date = time_now.strftime('%Y-%m-%d %H:%M:%S')
 
-        db_parser.sync_all_words_to_db(self.sql_session,date)
-        db_parser.sync_all_messages_to_db(self.sql_session,date)
+        if len(author.get_all_ids()) > 0:
+            db_parser.sync_all_authors_to_db(self.sql_session,date)
+
+        if len(source.get_all_ids()) > 0:
+            db_parser.sync_all_sources_to_db(self.sql_session,date)
+
+        if len(word.get_all_words_ids()) > 0:
+            db_parser.sync_all_words_to_db(self.sql_session,date)
+
+        if len(message.get_all_messages()) > 0:
+            db_parser.sync_all_messages_to_db(self.sql_session,date)
+
 
     def check_sync(self):
-        db_parser.check_save_consistency_words(self.sql_session)
+        if len(word.get_all_words_ids()) > 0:
+            db_parser.check_save_consistency_words(self.sql_session)
+
+    def get_not_decomposed_messages(self):
+        return db_parser.get_not_decomposed_messages(self.sql_session)
 
 
     def close_db(self):

@@ -27,6 +27,7 @@ def get_texts():
         try:
             logger.debug("Starting reading TEXT from file")
             streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
+            #streamTextFile = open(str(filename), mode='rt')
             # cnt=0
             # ch=streamTextFile.read(1)
             # while ch!='':
@@ -75,8 +76,14 @@ if __name__=='__main__':
     logger.info("Starting collecting texts")
     get_texts()
 
-    logger.info("Starting Analysis")
+    logger.info("Starting Parsing and Analysis")
     analyze()
+
+    logger.info("Total words:" + str(len(whir.word.get_all_words_ids())))
+    logger.info("Total authors:"+ str(len(whir.author.get_all_ids())))
+    logger.info("Total sources:"+ str(len(whir.source.get_all_ids())))
+    logger.info("Total messages:"+ str(len(whir.message.get_all_messages())))
+
 
     logger.info("DB starting save to DB")
     db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],

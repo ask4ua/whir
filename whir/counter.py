@@ -257,6 +257,58 @@ class word():
         return self.__subwords.items()
 
 
+class author():
+    __all_authors = {}
+
+    # id: object
+    def __init__(self,name):
+        self.name=str(name)
+        self.id=word.calc_id(text=name)
+
+        author.__all_authors[self.id]=self
+
+    def safe_create(name):
+        id=word.calc_id(text=name)
+        if id in author.__all_authors.keys():
+            return author.__all_authors.get(id)
+        else:
+            return author(name)
+
+    @staticmethod
+    def get_all_ids():
+        return author.__all_authors.keys()
+
+    @staticmethod
+    def get_by_id(author_id):
+        return author.__all_authors.get(author_id)
+
+
+class source():
+    __all_sources={}
+    #id: object
+
+    def __init__(self,name):
+        self.name=str(name)
+        self.id=word.calc_id(text=name)
+
+
+        source.__all_sources[self.id] = self
+
+    def safe_create(name):
+        id=word.calc_id(text=name)
+        if id in source.__all_sources.keys():
+            return source.__all_sources.get(id)
+        else:
+            return source(name)
+
+    @staticmethod
+    def get_all_ids():
+        return source.__all_sources.keys()
+
+    @staticmethod
+    def get_by_id(source_id):
+        return source.__all_sources.get(source_id)
+
 class message():
     __all_ids={}
     __all_messages=[]
@@ -271,6 +323,10 @@ class message():
 
         self.date_creation = None
         self.language=""
+
+        self.author_id=""
+        self.source_id=""
+        self.filename=""
 
         self.decomposed=False
 
@@ -299,6 +355,12 @@ class message():
     def get_unified_text(self):
         return text_unification.unification(self.text)
 
+    def calculate_id(self):
+        message.unified_text=text_unification.unification(self.text)
+        self.id = word.calc_id(unified_text=message.unified_text)
+        message.__all_ids[self.id] = self
+        return self.id
+
     def decompose(self):
         text_word=word.safe_create(self.text)
         self.id=text_word.id
@@ -313,5 +375,3 @@ class message():
 
         #for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
         #    self.word_used_in_text(wordphrase)
-
-
