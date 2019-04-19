@@ -30,7 +30,7 @@ if len(not_decomposed_list)>0:
 
     for file in not_decomposed_list:
         logger.info("Command to start docker, file:" + str(file))
-        os.system("nohup docker run --volumes-from whir-data --rm ubuntu18.04py3 python3 decompose_messages.py " + str(file) +" &")
+        os.system("nohup docker run --volumes-from whir-data --rm ubuntu1804py3 python3 decompose_messages.py " + str(file) +" &")
         #os.system("docker run -v /Users/volk/Downloads/txt/:/data -v /Users/volk/GIT/whir/:/app --rm ubuntu18.04py3 ls ./")
 
 
