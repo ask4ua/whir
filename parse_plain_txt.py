@@ -30,27 +30,21 @@ def read_text_from_file(filename,logger):
     #try:
     logger.debug("Starting reading TEXT from file")
         
-    try:
-        streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
-        ch="Start"
-        while ch != '':
-            try:
-                ch=streamTextFile.read(1)
-                text+=ch
+    streamTextFile = open(str(filename), mode='rt')
 
-            except BaseException as exc:
-                logger.warning("File " + filename + " cannot read some char")
-                ch="continue"
-                continue
-
-    except BaseException as exc:
+    ch="Start"
+    while ch != '':
         try:
-            logger.warning("File " + filename + " cannot read with exception: " + os.strerror(exc.errno))
-        except:
-            logger.warning("File " + filename + " cannot read with exception. No error number ")
-    else:
-        logger.info("File " + str(filename) + " read - closing it")
-        streamTextFile.close()
+            ch=streamTextFile.read(1)
+            text+=ch
+
+        except BaseException as exc:
+            logger.warning("File " + filename + " cannot read some char" + str(exc.__str__()))
+            ch="continue"
+            continue
+
+    logger.info("File " + str(filename) + " read - closing it")
+    streamTextFile.close()
 
     return text
 
@@ -65,7 +59,13 @@ def write_text_to_file(filename,text,logger):
 def parse_message(author,source,filename,logger):
     logger.info("Input file: " + filename)
 
-    message = whir.message(read_text_from_file(filename, logger))
+    try:
+        message = whir.message(read_text_from_file(filename, logger))
+
+    except BaseException:
+        logger.warning("File " + str(filename) + " not read!")
+        return False
+
     message.calculate_id()
 
     someauthor = whir.author.safe_create(author)
@@ -78,12 +78,12 @@ def parse_message(author,source,filename,logger):
     logger.info("Author: " + author + " hash: " + message.author_id)
     logger.info("Source: " + source + " hash: " + message.source_id)
 
-    try:
-        os_filename=filename.replace(" ","\\ ")
-        os.system("rm -rf " + os_filename)
-        logger.info("Sorce File removed; " + filename)
-    except:
-        logger.warning("Source File wasn`t removed")
+    #try:
+        #os_filename=filename.replace(" ","\\ ")
+        #os.system("rm -rf " + os_filename)
+        #logger.info("Sorce File removed; " + filename)
+    #except:
+        #logger.warning("Source File wasn`t removed")
 
     message.filename = "/data/HASHED/" + message.id + ".txt"
     write_text_to_file(message.filename, message.text, logger)
@@ -125,7 +125,8 @@ def parse_files(files,logger):
 
     for author,source,filename in files:
         if author != "" and source != "" and filename != "":
-            parse_message(author, source, filename, logger)
+            if not parse_message(author, source, filename, logger):
+                logger.warning("Skippimg File " + str(filename))
 
 
 if __name__=='__main__':
@@ -135,10 +136,8 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
-    author=""
-    source=""
-
     logger.info("Parsing Input")
+
     if not parse_input(logger):
         from files import files
         if len(files)>0:
