@@ -18,28 +18,44 @@ class Configs:
 
 import logging.config
 logging.config.fileConfig('conf/logging.conf')
-logger = logging.getLogger('root')
+logger = logging.getLogger('init_decomposer')
 Configs.load(logger)
 
-db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+while True:
+    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
                     host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
                     database=Configs.actual_config['db_database'])
 
-not_decomposed_list=db_session.get_not_decomposed_messages()
+    not_decomposed_list = db_session.get_not_decomposed_messages()
 
-if len(not_decomposed_list)>0:
+    db_session.close_db()
 
     cnt=0
-    limit=100
-    for file in not_decomposed_list:
-        logger.info("Command to start docker, file:" + str(file))
-        os.system("nohup docker run --volumes-from whir-data --rm ubuntu1804py3 python3 decompose_messages.py " + str(file) +" &")
-        #os.system("docker run -v /Users/volk/Downloads/txt/:/data -v /Users/volk/GIT/whir/:/app --rm ubuntu18.04py3 ls ./")
-        
-        cnt+=1
-        if cnt >= limit:
-            time.sleep(3600)
-            logger.info(str(limit) + " containers started - sleeping for 1 hout to start next 10")
+    if len(not_decomposed_list)>0:
+        file_cnt=0
+        container_cnt=0
+        file_limit=10
+        container_limit=10
+        files=""
 
-db_session.close_db()
+        pause_time=600
 
+        for file in not_decomposed_list:
+            cnt+=1
+            files += file + " "
+            file_cnt+=1
+
+            if file_cnt==file_limit-1 or cnt==len(not_decomposed_list):
+                if container_cnt<container_limit:
+                    os.system("nohup docker run --volumes-from whir-data --rm ubuntu1804py3 python3 decomposer.py " + str(files) + " &")
+                    container_cnt += 1
+                    logger.info("Start docker decomposer for files:" + str(files))
+                else:
+                    logger.info(str(container_cnt) + " containers started - sleeping for " + str(int(pause_time)) + " seconds to start next " + str(container_limit))
+                    #container_cnt=0
+                    break
+
+                file_cnt = 0
+                files=""
+
+    time.sleep(600)

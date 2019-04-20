@@ -17,7 +17,7 @@ do
 	AUTHOR=$(echo $file | awk -F- '{print $1}')
 	SOURCE=$(echo $file | awk -F- '{print $2 $3 $4}' | awk -F. '{print $1}')
 
-	echo -n "[\"${AUTHOR}\",\"${SOURCE}\",\"/data/SRC/${FILENAME}\"]"
+	echo -n "[\"\",\"${AUTHOR}\",\"${SOURCE}\",\"/data/SRC/${FILENAME}\"]"
 	cnt=$(expr $cnt + 1)
 done
 

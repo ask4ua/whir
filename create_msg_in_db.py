@@ -60,23 +60,21 @@ def parse_message(author,source,filename,logger):
     logger.info("Input file: " + filename)
 
     try:
-        message = whir.message(read_text_from_file(filename, logger))
+        somemessage = whir.message(read_text_from_file(filename, logger))
 
-    except BaseException:
-        logger.warning("File " + str(filename) + " not read!")
+    except BaseException as exc:
+        logger.warning("File " + str(filename) + " not read because of: " + str(exc.__str__()))
         return False
-
-    message.calculate_id()
 
     someauthor = whir.author.safe_create(author)
     somesource = whir.source.safe_create(source)
 
-    message.author_id = someauthor.id
-    message.source_id = somesource.id
+    somemessage.author_id = someauthor.id
+    somemessage.source_id = somesource.id
 
-    logger.info("File " + filename + " and it`s hash: " + message.id)
-    logger.info("Author: " + author + " hash: " + message.author_id)
-    logger.info("Source: " + source + " hash: " + message.source_id)
+    logger.info("File " + filename + " and it`s hash: " + somemessage.id)
+    logger.info("Author: " + author + " hash: " + somemessage.author_id)
+    logger.info("Source: " + source + " hash: " + somemessage.source_id)
 
     #try:
         #os_filename=filename.replace(" ","\\ ")
@@ -85,8 +83,10 @@ def parse_message(author,source,filename,logger):
     #except:
         #logger.warning("Source File wasn`t removed")
 
-    message.filename = "/data/HASHED/" + message.id + ".txt"
-    write_text_to_file(message.filename, message.text, logger)
+    somemessage.filename = "/data/HASHED/" + somemessage.id + ".txt"
+    write_text_to_file(somemessage.filename, somemessage.text, logger)
+
+    return True
 
 
 def parse_input(logger):
@@ -123,25 +123,23 @@ def parse_files(files,logger):
     source = ""
     filename = ""
 
-    for author,source,filename in files:
-        if author != "" and source != "" and filename != "":
-            if not parse_message(author, source, filename, logger):
-                logger.warning("Skippimg File " + str(filename))
+    for status,author,source,filename in files:
+        if status:
+            if author != "" and source != "" and filename != "":
+                if not parse_message(author, source, filename, logger):
+                    logger.warning("Skippimg File " + str(filename))
 
 
 if __name__=='__main__':
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
-    logger = logging.getLogger('create_message')
+    logger = logging.getLogger('create_msg_in_db')
 
     Configs.load(logger)
 
     logger.info("Parsing Input")
-
-    if not parse_input(logger):
-        from files import files
-        if len(files)>0:
-            parse_files(files,logger)
+    from files import files
+    parse_files(files,logger)
 
 
     db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],

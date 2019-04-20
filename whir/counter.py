@@ -315,8 +315,10 @@ class message():
 
     def __init__(self,text,language=""):
         self.text=text
+        self.unified_text=text_unification.unification(text)
 
-        self.id=None
+        self.id=word.calc_id(unified_text=self.unified_text)
+        message.__all_ids[self.id] = self
 
         # word_id : count usages
         message.__all_messages.append(self)
@@ -330,13 +332,14 @@ class message():
 
         self.decomposed=False
 
+        logger.debug("MSG " + str(self.id[0:6]) + "..." + self.id[-6:] + " created!)")
+
     @staticmethod
     def get_all_messages():
         return message.__all_messages
 
     @staticmethod
     def get_by_id(id=0):
-
         if id == 0:
             return message.__all_ids.keys()
 
@@ -356,18 +359,10 @@ class message():
         return text_unification.unification(self.text)
 
     def calculate_id(self):
-        message.unified_text=text_unification.unification(self.text)
-        self.id = word.calc_id(unified_text=message.unified_text)
-        message.__all_ids[self.id] = self
         return self.id
 
     def decompose(self):
         text_word=word.safe_create(self.text)
-        self.id=text_word.id
-        self.unified_text=text_word.unified_text
-
-        message.__all_ids[self.id]=self
-
         text_word.decompose()
         self.decomposed=True
 

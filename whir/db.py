@@ -21,6 +21,7 @@ class queries:
     @staticmethod
     def masking(text):
         masking_rules={
+            '\\': '\\\\',
             '\'':'\\\'',
             '"':'\\\"',
             '%':'\\%',
@@ -56,8 +57,8 @@ class queries:
         return element
 
     @staticmethod
-    def get_not_decomposed_message_files():
-        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null"
+    def get_not_decomposed_message_files(file_limit=10):
+        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null" + " limit " + str(file_limit) + ";"
         return SQL
 
     @staticmethod
@@ -133,9 +134,9 @@ class queries:
         return SQL
 
     @staticmethod
-    def insert_words(word_ids, date):
+    def insert_words(word_ids, date, table_name="words"):
 
-        SQL = "insert into words (word_id, text, creation_date) values"
+        SQL = "insert into "+ str(table_name) +" (word_id, text, creation_date) values"
         for someword_id in word_ids:
             someword=word.get_by_id(someword_id)
             SQL+="(\'" + str(someword.id) + "\', \'" + queries.masking(someword.unified_text[0:255]) + "\', \'" + str(date) + "\'), "
@@ -152,7 +153,7 @@ class queries:
         return SQL
 
     @staticmethod
-    def insert_word_in_word(word_ids):
+    def insert_wordsinword(word_ids,table_name="wordsinword"):
         SQL=""
 
         wordsinword_list=[]
@@ -163,7 +164,7 @@ class queries:
                     wordsinword_list.append([str(word_id),str(subword_id),str(count)])
 
         if len(wordsinword_list) > 0:
-            SQL += "insert into wordsinword (mainword_id,subword_id,count) values "
+            SQL += "insert into "+ table_name +" (mainword_id,subword_id,count) values "
             for record in wordsinword_list:
                 SQL += "(\'" + record[0] + "\', \'" + record[1] + "\', \'" + record[2] + "\'), "
 
@@ -286,6 +287,26 @@ class queries:
 
         return SQL
 
+    @staticmethod
+    def create_new_words_table(table_name):
+        SQL = "create table " + str(table_name) + " (`WORD_ID` CHAR(64) NOT NULL,  `TEXT` VARCHAR(4000) DEFAULT NULL, `CREATION_DATE` DATETIME DEFAULT NULL, PRIMARY KEY (`WORD_ID`)) ENGINE = INNODB DEFAULT CHARSET = UTF8MB4"
+        return SQL
+
+    @staticmethod
+    def create_new_wordsinword_table(table_name):
+        SQL = "create table " + str(table_name) + " (`MAINWORD_ID` CHAR(64) NOT NULL, `SUBWORD_ID` CHAR(64) NOT NULL, `COUNT` INT(11) NOT NULL, PRIMARY KEY (`MAINWORD_ID`, `SUBWORD_ID`)) ENGINE = INNODB DEFAULT CHARSET = UTF8MB4"
+        return SQL
+
+    @staticmethod
+    def merge_the_tables(src_table,dst_table):
+        SQL="INSERT IGNORE " + "INTO " + str(dst_table) + " SELECT * FROM " + str(src_table) +";"
+        return SQL
+
+    @staticmethod
+    def drop_the_table(table_name):
+        SQL="drop table " + str(table_name) + ";"
+        return SQL
+
 class db_parser:
 
     @staticmethod
@@ -295,7 +316,7 @@ class db_parser:
         cursor.execute("SET character_set_connection=utf8mb4;")
 
     @staticmethod
-    def sync_all_words_to_db(sql_session, date):
+    def sync_all_words_to_db(sql_session, date,temp_prefix=""):
 
         logger.debug("Staring saving all words to db")
 
@@ -319,7 +340,7 @@ class db_parser:
             return new_word_ids
 
 
-        def write_word_to_db(new_word_ids,sql_session,date):
+        def write_word_to_db(new_word_ids,sql_session,date,temp_prefix=""):
             logger.info("Starting words to DB")
 
             cursor = sql_session.cursor()
@@ -328,29 +349,52 @@ class db_parser:
             # in such case repeat new words and try again
 
             try:
-                limit=10
-                counter=0
-                for word_id in new_word_ids:
-                    #cursor.execute(queries.insert_words([word_id], date))
-                    cursor.execute(queries.delete_words([word_id]))
-                    cursor.execute(queries.insert_words([word_id], date))
+                temp_prefix = random.randint(100000,999999)
+                logger.info("Created temp prefix for merging: " + str(temp_prefix))
+
+                temp_words = str(temp_prefix) + "_words"
+                temp_wordsinword = str(temp_prefix) + "_wordsinword"
+
+                cursor.execute(queries.create_new_words_table(temp_words))
+                cursor.execute(queries.create_new_wordsinword_table(temp_wordsinword))
+
+                window=1000
+                pointer=0
+
+                logger.info("Inserting Words and Wordsinwords to intermediate table")
+                while pointer < len(new_word_ids):
+                    word_ids = new_word_ids[pointer:pointer+window]
+                    #cursor.execute(queries.insert_words(word_ids, date))
+                    #cursor.execute(queries.delete_words([word_id]))
+                    cursor.execute(queries.insert_words(word_ids, date,temp_words))
 
                     #cursor.execute(queries.insert_word_in_word([word_id]))
-                    cursor.execute(queries.delete_wordsinword(word_id))
-                    cursor.execute(queries.insert_word_in_word([word_id]))
+                    #cursor.execute(queries.delete_wordsinword(word_id))
+                    cursor.execute(queries.insert_wordsinword(word_ids,temp_wordsinword))
 
-                    counter+=1
+                    pointer += window
 
-                    if counter>=limit:
-                        sql_session.commit()
-                        counter=counter-limit
                 sql_session.commit()
+
+                logger.info("Merging Words and Wordsinwords with intermediate table")
+                cursor.execute(queries.merge_the_tables(temp_words,"words"))
+                cursor.execute(queries.merge_the_tables(temp_wordsinword, "wordsinword"))
+                sql_session.commit()
+
+                logger.info("Dropping Words and Wordsinwords intermediate table")
+                cursor.execute(queries.drop_the_table(temp_words))
+                cursor.execute(queries.drop_the_table(temp_wordsinword))
                 cursor.close()
                 return True
 
             except mysql.connector.Error as err:
                 logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__() + " " + str(err.errno)))
-                logger.warning("SQL: " + str(cursor.statement))
+                logger.info("SQL: " + str(cursor.statement))
+
+                logger.info("Dropping Words and Wordsinwords intermediate table")
+                cursor.execute(queries.drop_the_table(temp_words))
+                cursor.execute(queries.drop_the_table(temp_wordsinword))
+
                 cursor.close()
                 return False
 
@@ -417,7 +461,7 @@ class db_parser:
 
 
     @staticmethod
-    def sync_all_authors_to_db(sql_session,date):
+    def sync_all_authors_to_db(sql_session,date,temp_prefix=""):
 
         logger.info("Starting creating in DB Authors")
         cursor = sql_session.cursor()
@@ -431,9 +475,12 @@ class db_parser:
 
         cursor.close()
 
+    @staticmethod
+    def creape_path():
+        pass
 
     @staticmethod
-    def sync_all_sources_to_db(sql_session,date):
+    def sync_all_sources_to_db(sql_session,date,temp_prefix=""):
 
         logger.info("Starting creating in DB Sources")
         cursor = sql_session.cursor()
@@ -448,7 +495,7 @@ class db_parser:
         cursor.close()
 
     @staticmethod
-    def sync_all_messages_to_db(sql_session,date):
+    def sync_all_messages_to_db(sql_session,date,temp_prefix=""):
 
         logger.info("Starting creating in DB messages")
         cursor = sql_session.cursor()
@@ -463,13 +510,13 @@ class db_parser:
         cursor.close()
 
     @staticmethod
-    def get_not_decomposed_messages(sql_session):
+    def get_not_decomposed_messages(sql_session,file_limit=10):
         not_decomposed_list=[]
 
         logger.info("Starting lookup in DB for not decomposed messages")
         cursor = sql_session.cursor()
         db_parser.force_utf8mb4(cursor)
-        cursor.execute(queries.get_not_decomposed_message_files())
+        cursor.execute(queries.get_not_decomposed_message_files(file_limit))
 
         for somefile in cursor:
             not_decomposed_list.append(somefile[0])
@@ -478,6 +525,8 @@ class db_parser:
         cursor.close()
 
         return not_decomposed_list
+
+
 
 class db:
 
@@ -497,7 +546,10 @@ class db:
             else:
                 logger.error(err)
 
-    def sync_all_to_db(self):
+    def create_temp_table(self):
+        pass
+
+    def sync_all_to_db(self,temp_prefix=""):
         time_now = datetime.datetime.now()
         date = time_now.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -510,7 +562,7 @@ class db:
         if len(word.get_all_words_ids()) > 0:
             db_parser.sync_all_words_to_db(self.sql_session,date)
 
-        if len(message.get_all_messages()) > 0:
+        if len(message.get_by_id()) > 0:
             db_parser.sync_all_messages_to_db(self.sql_session,date)
 
 
@@ -518,8 +570,8 @@ class db:
         if len(word.get_all_words_ids()) > 0:
             db_parser.check_save_consistency_words(self.sql_session)
 
-    def get_not_decomposed_messages(self):
-        return db_parser.get_not_decomposed_messages(self.sql_session)
+    def get_not_decomposed_messages(self,file_limit=10):
+        return db_parser.get_not_decomposed_messages(self.sql_session,file_limit)
 
 
     def close_db(self):
