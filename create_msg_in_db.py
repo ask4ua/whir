@@ -141,20 +141,17 @@ if __name__=='__main__':
 
     logger.info("Parsing Input")
 
-    while True:
-        from files import files
-        parse_files(files,logger)
 
-        db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
-                        host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
-                        database=Configs.actual_config['db_database'])
+    from files import files
+    parse_files(files,logger)
 
-        db_session.sync_all_to_db()
-        db_session.check_sync()
+    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
+                    database=Configs.actual_config['db_database'])
 
-        db_session.close_db()
+    db_session.sync_all_to_db()
+    db_session.check_sync()
 
-        pause=15*60
-        logger.info("Sleeping for " + str(pause) + " seconds.")
-        time.sleep(pause)
+    db_session.close_db()
+
 
