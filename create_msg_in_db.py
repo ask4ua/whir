@@ -8,6 +8,8 @@ from whir.db import db
 from whir.db import author
 from whir.db import source
 
+import time
+
 
 #author,book name, file
 
@@ -127,7 +129,7 @@ def parse_files(files,logger):
         if status:
             if author != "" and source != "" and filename != "":
                 if not parse_message(author, source, filename, logger):
-                    logger.warning("Skippimg File " + str(filename))
+                    logger.warning("File " + str(filename) + " was skipped!")
 
 
 if __name__=='__main__':
@@ -138,15 +140,19 @@ if __name__=='__main__':
     Configs.load(logger)
 
     logger.info("Parsing Input")
-    from files import files
-    parse_files(files,logger)
 
+    while true:
+        from files import files
+        parse_files(files,logger)
 
-    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
-                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
-                    database=Configs.actual_config['db_database'])
+        db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+                        host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
+                        database=Configs.actual_config['db_database'])
 
-    db_session.sync_all_to_db()
-    db_session.check_sync()
+        db_session.sync_all_to_db()
+        db_session.check_sync()
 
-    db_session.close_db()
+        db_session.close_db()
+
+        time.sleep(15*60)
+
