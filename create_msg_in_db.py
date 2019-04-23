@@ -154,5 +154,7 @@ if __name__=='__main__':
 
         db_session.close_db()
 
-        time.sleep(15*60)
+        pause=15*60
+        logger.info("Sleeping for " + str(pause) + " seconds.")
+        time.sleep(pause)
 
