@@ -135,7 +135,7 @@ def parse_files(files,logger):
 if __name__=='__main__':
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
-    logger = logging.getLogger('create_msg_in_db')
+    logger = logging.getLogger('parser')
 
     Configs.load(logger)
 
