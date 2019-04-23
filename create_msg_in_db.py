@@ -141,7 +141,7 @@ if __name__=='__main__':
 
     logger.info("Parsing Input")
 
-    while true:
+    while True:
         from files import files
         parse_files(files,logger)
 
