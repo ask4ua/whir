@@ -145,9 +145,15 @@ if __name__=='__main__':
     from files import files
     parse_files(files,logger)
 
-    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
-                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
-                    database=Configs.actual_config['db_database'])
+#    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+#                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
+#                    database=Configs.actual_config['db_database'])
+    user=str(os.environ['WHIR_DB_USER'])
+    database=str(os.environ['WHIR_DB_NAME'])
+    host=str(os.environ['WHIR_DB_HOST'])
+    filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
+    passwd=read_text_from_file(filename)
+    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
 
     db_session.sync_all_to_db()
     db_session.check_sync()

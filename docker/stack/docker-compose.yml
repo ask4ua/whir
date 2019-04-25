@@ -20,7 +20,15 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
-  whir-parser:
+
+   data:
+        image: whir-data
+        deploy:
+          replicas: 1
+        volumes:
+                - "files_vol:/data"     
+
+   parser:
       # replace username/repo:tag with your name and image details
         image: whir
         deploy:
@@ -45,7 +53,7 @@ services:
                 - WHIR_DB_HOST=mariadb
         networks:
                 - whirnet
-  whir-decomposer:
+  decomposer:
       # replace username/repo:tag with your name and image details
         image: whir
         deploy:
