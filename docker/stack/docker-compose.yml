@@ -1,27 +1,28 @@
-version: "3"
-  
+version: "3.1"
 services:
-  whir-data:
-  # replace username/repo:tag with your name and image details
-    image: localhost:5000/whir-data
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 128M
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.role == manager]
+  mariadb:
+    image: mariadb
     volumes:
-            - "/home/volk/GIT/whir:/app"
-            - "/home/volk/txt:/data"
+      - db_vol:/var/lib/mysql
+    secrets:
+      - whir_db_password
+      - root_db_password
+    environment:
+      - MYSQL_USER=whir
+      - MYSQL_DATABASE=whir
+      - MYSQL_PASSWORD_FILE=/run/secrets/whir_db_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root_db_password
     networks:
       - whirnet
+    deploy:
+      placement:
+          constraints: [node.role == manager]
+      replicas: 1
+      restart_policy:
+        condition: on-failure
   whir-parser:
       # replace username/repo:tag with your name and image details
-        image: localhost:5000/whir-parser
+        image: whir
         deploy:
           replicas: 1
           resources:
@@ -32,14 +33,21 @@ services:
             condition: on-failure
           placement:
             constraints: [node.role == manager]
+        command: "while true; do /usr/bin/python3 create_msg_in_db.py; sleep 900; done"
         volumes:
-            - "/home/volk/GIT/whir:/app"
-            - "/home/volk/txt:/data"
+                - "files_vol:/data"
+        secrets:
+                - whir_db_password
+        environment:
+                - WHIR_DB_USER=whir
+                - WHIR_DB_NAME=whir
+                - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
+                - WHIR_DB_HOST=mariadb
         networks:
-          - whirnet
+                - whirnet
   whir-decomposer:
       # replace username/repo:tag with your name and image details
-        image: localhost:5000/whir-decomposer
+        image: whir
         deploy:
           replicas: 4
           resources:
@@ -50,10 +58,26 @@ services:
             condition: on-failure
           placement:
             constraints: [node.role == manager]
+        command: "/usr/bin/python3 decomposer.py"
         volumes:
-            - "/home/volk/GIT/whir:/app"
-            - "/home/volk/txt:/data"
+                - "files_vol:/data"
+        secrets:
+                - whir_db_password
+        environment:
+                - WHIR_DB_USER=whir
+                - WHIR_DB_NAME=whir
+                - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
+                - WHIR_DB_HOST=mariadb
         networks:
-          - whirnet
+                - whirnet
+secrets:
+        whir_db_password:
+                external: true
+        root_db_password:
+                external: true
+        
+volumes:
+        db_vol:
+        files_vol:
 networks:
         whirnet:
