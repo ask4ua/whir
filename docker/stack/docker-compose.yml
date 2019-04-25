@@ -1,0 +1,59 @@
+version: "3"
+  
+services:
+  whir-data:
+  # replace username/repo:tag with your name and image details
+    image: localhost:5000/whir-data
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    volumes:
+            - "/home/volk/GIT/whir:/app"
+            - "/home/volk/txt:/data"
+    networks:
+      - whirnet
+  whir-parser:
+      # replace username/repo:tag with your name and image details
+        image: localhost:5000/whir-parser
+        deploy:
+          replicas: 1
+          resources:
+            limits:
+              cpus: "0.5"
+              memory: 128M
+          restart_policy:
+            condition: on-failure
+          placement:
+            constraints: [node.role == manager]
+        volumes:
+            - "/home/volk/GIT/whir:/app"
+            - "/home/volk/txt:/data"
+        networks:
+          - whirnet
+  whir-decomposer:
+      # replace username/repo:tag with your name and image details
+        image: localhost:5000/whir-decomposer
+        deploy:
+          replicas: 4
+          resources:
+            limits:
+              cpus: "0.5"
+              memory: 1G
+          restart_policy:
+            condition: on-failure
+          placement:
+            constraints: [node.role == manager]
+        volumes:
+            - "/home/volk/GIT/whir:/app"
+            - "/home/volk/txt:/data"
+        networks:
+          - whirnet
+networks:
+        whirnet:
