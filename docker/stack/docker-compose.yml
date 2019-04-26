@@ -1,83 +1,76 @@
 version: "3.1"
 services:
-  mariadb:
-    image: mariadb
-    volumes:
-      - db_vol:/var/lib/mysql
-    secrets:
-      - whir_db_password
-      - root_db_password
-    environment:
-      - MYSQL_USER=whir
-      - MYSQL_DATABASE=whir
-      - MYSQL_PASSWORD_FILE=/run/secrets/whir_db_password
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root_db_password
-    networks:
-      - whirnet
-    deploy:
-      placement:
-          constraints: [node.role == manager]
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-   data:
-        image: whir-data
-        deploy:
-          replicas: 1
-        volumes:
-                - "files_vol:/data"     
-
-   parser:
+        mysqldb:
+                image: mysql
+                ports:
+                        - 3306:3306
+                volumes:
+                        - db_vol:/var/lib/mysql
+                secrets:
+                        - whir_db_password
+                        - root_db_password
+                command: --default-authentication-plugin=mysql_native_password
+                environment:
+                        - MYSQL_USER=whir
+                        - MYSQL_DATABASE=whir
+                        - MYSQL_PASSWORD_FILE=/run/secrets/whir_db_password
+                        - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root_db_password
+                networks:
+                        - whirnet
+                deploy:
+                        placement:
+                                constraints: [node.role == manager]
+                        replicas: 1
+                        restart_policy:
+                                condition: on-failure
+        parser:
       # replace username/repo:tag with your name and image details
-        image: whir
-        deploy:
-          replicas: 1
-          resources:
-            limits:
-              cpus: "0.5"
-              memory: 128M
-          restart_policy:
-            condition: on-failure
-          placement:
-            constraints: [node.role == manager]
-        command: "while true; do /usr/bin/python3 create_msg_in_db.py; sleep 900; done"
-        volumes:
-                - "files_vol:/data"
-        secrets:
-                - whir_db_password
-        environment:
-                - WHIR_DB_USER=whir
-                - WHIR_DB_NAME=whir
-                - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
-                - WHIR_DB_HOST=mariadb
-        networks:
-                - whirnet
-  decomposer:
+                image: whir
+                deploy:
+                        replicas: 1
+                        resources:
+                                limits:
+                                        cpus: "0.5"
+                                        memory: 128M
+                        restart_policy:
+                                condition: on-failure
+                        placement:
+                                constraints: [node.role == manager]
+                command: "/usr/bin/python3 parser.py"
+                volumes:
+                        - "data_vol:/data"
+                secrets:
+                        - whir_db_password
+                environment:
+                        - WHIR_DB_USER=whir
+                        - WHIR_DB_NAME=whir
+                        - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
+                        - WHIR_DB_HOST=mysqldb
+                networks:
+                        - whirnet
+        decomposer:
       # replace username/repo:tag with your name and image details
-        image: whir
-        deploy:
-          replicas: 4
-          resources:
-            limits:
-              cpus: "0.5"
-              memory: 1G
-          restart_policy:
-            condition: on-failure
-          placement:
-            constraints: [node.role == manager]
-        command: "/usr/bin/python3 decomposer.py"
-        volumes:
-                - "files_vol:/data"
-        secrets:
-                - whir_db_password
-        environment:
-                - WHIR_DB_USER=whir
-                - WHIR_DB_NAME=whir
-                - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
-                - WHIR_DB_HOST=mariadb
-        networks:
-                - whirnet
+                image: whir
+                deploy:
+                        replicas: 8
+                        resources:
+                                limits:
+                                        cpus: "0.5"
+                                        memory: 1G
+                        restart_policy:
+                                condition: on-failure
+                command: "/usr/bin/python3 decomposer.py"
+                volumes:
+                        - "data_vol:/data"
+                secrets:
+                        - whir_db_password
+                environment:
+                        - WHIR_DB_USER=whir
+                        - WHIR_DB_NAME=whir
+                        - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
+                        - WHIR_DB_HOST=mysqldb
+                networks:
+                        - whirnet
 secrets:
         whir_db_password:
                 external: true
@@ -86,6 +79,6 @@ secrets:
         
 volumes:
         db_vol:
-        files_vol:
+        data_vol:
 networks:
         whirnet:

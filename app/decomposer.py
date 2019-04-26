@@ -60,17 +60,25 @@ def read_files(files):
     #     else:
     #         continue
 
+def connect_to_db():
+
+    user=str(os.environ['WHIR_DB_USER'])
+    database=str(os.environ['WHIR_DB_NAME'])
+    host=str(os.environ['WHIR_DB_HOST'])
+    filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
+    passwd=read_text_from_file(filename).strip()
+    
+    logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
+    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
+
+    return db_session
+
 def read_from_db(file_limit=10):
     #db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
     #                host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
     #                database=Configs.actual_config['db_database'])
     
-    user=str(os.environ['WHIR_DB_USER'])
-    database=str(os.environ['WHIR_DB_NAME'])
-    host=str(os.environ['WHIR_DB_HOST'])
-    filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
-    passwd=read_text_from_file(filename)
-    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
+    db_session = connect_to_db()
 
     not_decomposed_list = db_session.get_not_decomposed_messages(file_limit)
 
@@ -93,12 +101,7 @@ def sync_to_db():
     #                host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
     #                database=Configs.actual_config['db_database'])
 
-    user=str(os.environ['WHIR_DB_USER'])
-    database=str(os.environ['WHIR_DB_NAME'])
-    host=str(os.environ['WHIR_DB_HOST'])
-    filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
-    passwd=read_text_from_file(filename)
-    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
+    db_session = connect_to_db()
 
     db_session.sync_all_to_db()
     db_session.check_sync()
@@ -141,8 +144,8 @@ if __name__=='__main__':
             logger.info("DB starting save to DB")
             sync_to_db()
 
-            pause_time = 10
-            pause_time += random.randint(1, 600)
+            pause_time = 2
+            pause_time += random.randint(1, 20)
 
             logger.info("Sleeping for " + str(pause_time) + " seconds.")
             time.sleep(pause_time)
