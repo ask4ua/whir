@@ -117,29 +117,82 @@ class text_unification:
 
         return simple_split + subphrases_and_words
 
-class word():
+
+class id_management():
+    all_ids = {}
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def calc_id(unified_text="", text=""):
+
+        if unified_text != "":
+            text_to_encode = unified_text[:]
+            return hashlib.sha256(text_to_encode.encode()).hexdigest()
+        else:
+            text_to_encode = text_unification.unification(text)[:]
+            return hashlib.sha256(text_to_encode.encode()).hexdigest()
+
+    @classmethod
+    def clear_all(cls):
+        for some in cls.all_ids.values():
+            del some
+
+        cls.all_ids = {}
+
+    @classmethod
+    def get_by_id(cls, id=0):
+
+        if id == 0:
+            return cls.all_ids.keys()
+        elif id in cls.all_ids.keys():
+            return cls.all_ids.get(id)
+        else:
+            logger.warning("Requested id absent in all ids storage and != 0, id: " + str(id))
+            return False
+
+    @classmethod
+    def get_all_ids(cls):
+        logger.debug("Getting all entities IDs, total:" + str(len(cls.all_ids.values())) + " Class: " + str(cls.__name__))
+        return cls.all_ids.keys()
+
+
+    @classmethod
+    def get_all(cls):
+        logger.debug("Getting all entities obj, total:" + str(len(cls.all_ids.values())) + "Class: " + str(cls.__name__))
+        return cls.all_ids.values()
+
+    @classmethod
+    def safe_create(cls,name):
+        id=cls.calc_id(text=name)
+
+        if id in cls.all_ids.keys():
+            return cls.all_ids.get(id)
+        else:
+            return cls(name)
+
+    def get_unified_text(self):
+        return text_unification.unification(self.text)
+
+    def set_db_sync(self,db_sync=True):
+        self.__db_sync=db_sync
+
+
+
+class word(id_management):
     #list all: text: word_obj
     #all={}
 
-    __all_ids={}
+    all_ids={}
     #id - object_link
-
-    @staticmethod
-    def calc_id(unified_text="",text=""):
-
-        if unified_text != "":
-            text_to_encode=unified_text[:]
-            return hashlib.sha256(text_to_encode.encode()).hexdigest()
-        else:
-            text_to_encode=text_unification.unification(text)[:]
-            return hashlib.sha256(text_to_encode.encode()).hexdigest()
 
     def __init__(self, text):
         self.unified_text = text_unification.unification(text)
         self.id = word.calc_id(unified_text=self.unified_text)
+        word.all_ids[self.id] = self
 
         self.type=""
-        word.__all_ids[self.id] = self
 
         self.__subwords = {}
         # subword_id, cound
@@ -148,51 +201,39 @@ class word():
 
         logger.debug("hash: \'"+ str(self.id) + "\' word " + self.unified_text + " created")
 
-    def return_subwords(self):
-        if len(self.__subwords) != 0:
-            return self.__subwords.copy()
+    def get_subwords(self):
+        return self.__subwords.items()
+
+    @staticmethod
+    def get_ids_sorted_desc_by_subwords(word_ids=[]):
+
+        sorting_word_ids=[]
+
+        if len(word_ids)==0:
+            sorting_word_ids=word.get_all_ids()
         else:
-            return False
+            sorting_word_ids=word_ids
 
-    def set_db_sync(self,db_sync=True):
-        self.__db_sync=db_sync
 
-    @staticmethod
-    def safe_create(text):
-        id=word.calc_id(text=text)
+        # sort all word_ids from 0 subbowrds to maximum and returns a list
+        logger.info("Starting Sorting word_ids by subwords count descending")
 
-        if id in word.__all_ids.keys():
-            entity = word.__all_ids[id]
-        else:
-            entity = word(text)
+        word_ids_with_sub_number = {}
 
-        return entity
+        for word_id in sorting_word_ids:
+            someword=word.get_by_id(word_id)
+            word_ids_with_sub_number[word_id] = len(someword.get_subwords())
 
-    @staticmethod
-    def get_by_id(id):
+        sorted_word_ids_with_sub_number=sorted(word_ids_with_sub_number.items(), key=lambda x: x[1], reverse=True)
+        # collected value - list of tuples
 
-        if id in word.__all_ids.keys():
-            return word.__all_ids[id]
-        else:
-            logger.warning("Requested id absent in word all ids and != 0, id: " + str(id))
-            return False
+        sorted_word_ids=[]
+        for i in range(len(sorted_word_ids_with_sub_number)):
+            sorted_word_ids.append(sorted_word_ids_with_sub_number[i][0])
 
-    @staticmethod
-    def get_all_words_ids():
-        logger.debug("Getting all word ids, total:" + str(len(word.__all_ids)))
-        return word.__all_ids.keys()
 
-    @staticmethod
-    def sort_by_subwords_and_get_word_ids():
-        #sort all word_ids from 0 subbowrds to maximum
-
-        logger.debug("Getting all word ids, total:" + str(len(word.__all_ids)))
-        return word.__all_ids.keys()
-
-    @staticmethod
-    def get_all_words():
-        logger.debug("Getting all words, total:" + str(len(word.__all_ids)))
-        return word.__all_ids.values()
+        logger.info("Sorting word_ids by subwords count descending - Finished")
+        return sorted_word_ids
 
     def decompose(self):
         self.__subwords = {}
@@ -253,75 +294,38 @@ class word():
     #subword is only linking to existing words
     #counting performed under message
 
-    def get_subwords(self):
-        return self.__subwords.items()
 
-
-class author():
-    __all_authors = {}
+class author(id_management):
+    all_ids = {}
 
     # id: object
     def __init__(self,name):
         self.name=str(name)
-        self.id=word.calc_id(text=name)
+        self.id=author.calc_id(text=name)
 
-        author.__all_authors[self.id]=self
-
-    def safe_create(name):
-        id=word.calc_id(text=name)
-        if id in author.__all_authors.keys():
-            return author.__all_authors.get(id)
-        else:
-            return author(name)
-
-    @staticmethod
-    def get_all_ids():
-        return author.__all_authors.keys()
-
-    @staticmethod
-    def get_by_id(author_id):
-        return author.__all_authors.get(author_id)
+        author.all_ids[self.id]=self
 
 
-class source():
-    __all_sources={}
+class source(id_management):
+    all_ids={}
     #id: object
 
-    def __init__(self,name):
-        self.name=str(name)
-        self.id=word.calc_id(text=name)
+    def __init__(self,text):
+        self.name=str(text)
+        self.id=source.calc_id(text=text)
 
+        source.all_ids[self.id] = self
 
-        source.__all_sources[self.id] = self
-
-    def safe_create(name):
-        id=word.calc_id(text=name)
-        if id in source.__all_sources.keys():
-            return source.__all_sources.get(id)
-        else:
-            return source(name)
-
-    @staticmethod
-    def get_all_ids():
-        return source.__all_sources.keys()
-
-    @staticmethod
-    def get_by_id(source_id):
-        return source.__all_sources.get(source_id)
-
-class message():
-    __all_ids={}
-    __all_messages=[]
+class message(id_management):
+    all_ids={}
 
     def __init__(self,text,language=""):
+
         self.text=text
         self.unified_text=text_unification.unification(text)
 
-        self.id=word.calc_id(unified_text=self.unified_text)
-        message.__all_ids[self.id] = self
-
-        # word_id : count usages
-        message.__all_messages.append(self)
+        self.id=message.calc_id(unified_text=self.unified_text)
+        message.all_ids[self.id] = self
 
         self.date_creation = None
         self.language=""
@@ -333,40 +337,15 @@ class message():
         self.decomposed=False
 
         logger.debug("MSG " + str(self.id[0:6]) + "..." + self.id[-6:] + " created!)")
-
-    @staticmethod
-    def get_all_messages():
-        return message.__all_messages
-
-    @staticmethod
-    def get_by_id(id=0):
-        if id == 0:
-            return message.__all_ids.keys()
-
-        elif id in message.__all_ids.keys():
-            return message.__all_ids[id]
-        else:
-            return False
-
-    def print_all_words(self):
-        logger.debug("Printing all messages")
-        logger.debug(str(self.__allwords))
-
-        for (word_id, count) in self.__allwords.items():
-            print(word_id,'\''+str(word.get_by_id(word_id).unified_text)+'\''," counted",count,"times")
-
-    def get_unified_text(self):
-        return text_unification.unification(self.text)
-
-    def calculate_id(self):
-        return self.id
+        logger.debug("All ids: " + str(message.all_ids))
 
     def decompose(self):
         text_word=word.safe_create(self.text)
         text_word.decompose()
         self.decomposed=True
 
-
-
         #for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
         #    self.word_used_in_text(wordphrase)
+
+    def __str__(self):
+        return "Message " + str(self.id[0:6]) + "..." + self.id[-6:]

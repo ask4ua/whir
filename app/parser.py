@@ -135,7 +135,7 @@ def parse_files(files,logger):
                     logger.warning("File " + str(filename) + " was skipped!")
 
 
-def connect_to_db(logger):
+def connect_to_db():
 
     user=str(os.environ['WHIR_DB_USER'])
     database=str(os.environ['WHIR_DB_NAME'])
@@ -143,15 +143,15 @@ def connect_to_db(logger):
     filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
     passwd=read_text_from_file(filename,logger).strip()
 
-    logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
-    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
+    #logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
+    db_session = db(user=user, password=passwd,host=host,database=database)
 
     return db_session
 
 if __name__=='__main__':
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
-    logger = logging.getLogger('parser')
+    logger = logging.getLogger('root')
 
     Configs.load(logger)
 
@@ -164,7 +164,7 @@ if __name__=='__main__':
 #    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
 #                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
 #                    database=Configs.actual_config['db_database'])
-    db_session=connect_to_db(logger)
+    db_session=connect_to_db()
 
     db_session.sync_all_to_db()
     db_session.check_sync()

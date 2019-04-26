@@ -1,20 +1,19 @@
 version: "3.1"
 services:
-        mysqldb:
-                image: mysql
+        postgres:
+                image: whir-db
                 ports:
-                        - 3306:3306
+                        - 5432:5432
                 volumes:
-                        - db_vol:/var/lib/mysql
+                        - postgres_vol:/var/lib/postgresql/data
                 secrets:
                         - whir_db_password
                         - root_db_password
-                command: --default-authentication-plugin=mysql_native_password
                 environment:
-                        - MYSQL_USER=whir
-                        - MYSQL_DATABASE=whir
-                        - MYSQL_PASSWORD_FILE=/run/secrets/whir_db_password
-                        - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/root_db_password
+                        - POSTGRES_USER=whir
+                        - POSTGRES_DB=whir
+                        - POSTGRES_PASSWORD_FILE=/run/secrets/whir_db_password
+                        - POSTGRES_ROOT_PASSWORD_FILE=/run/secrets/root_db_password
                 networks:
                         - whirnet
                 deploy:
@@ -22,10 +21,10 @@ services:
                                 constraints: [node.role == manager]
                         replicas: 1
                         restart_policy:
-                                condition: on-failure
+                                condition: any
         parser:
       # replace username/repo:tag with your name and image details
-                image: whir
+                image: whir-app
                 deploy:
                         replicas: 1
                         resources:
@@ -45,18 +44,17 @@ services:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
                         - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
-                        - WHIR_DB_HOST=mysqldb
+                        - WHIR_DB_HOST=postgres
                 networks:
                         - whirnet
         decomposer:
       # replace username/repo:tag with your name and image details
-                image: whir
+                image: whir-app
                 deploy:
-                        replicas: 8
-                        resources:
-                                limits:
-                                        cpus: "0.5"
-                                        memory: 1G
+                        replicas: 4
+                        #resources:
+                                #limits:
+                                        #cpus: "0.24"
                         restart_policy:
                                 condition: on-failure
                 command: "/usr/bin/python3 decomposer.py"
@@ -68,7 +66,7 @@ services:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
                         - WHIR_DB_PASSWORD_FILE=/run/secrets/whir_db_password
-                        - WHIR_DB_HOST=mysqldb
+                        - WHIR_DB_HOST=postgres
                 networks:
                         - whirnet
 secrets:
@@ -78,7 +76,7 @@ secrets:
                 external: true
         
 volumes:
-        db_vol:
+        postgres_vol:
         data_vol:
 networks:
         whirnet:

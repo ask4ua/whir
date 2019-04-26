@@ -50,7 +50,6 @@ def read_files(files):
         logger.debug("Input file: " + filename)
         message = whir.message(read_text_from_file(filename))
 
-
     #directory = os.fsencode("./texts/")
     #for file in os.listdir(directory):
     #     filename = os.fsdecode(file)
@@ -68,8 +67,8 @@ def connect_to_db():
     filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
     passwd=read_text_from_file(filename).strip()
     
-    logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
-    db_session = db(user=user, password=passwd,host=host, port=3306,database=database)
+    #logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
+    db_session = db(user=user, password=passwd,host=host,database=database)
 
     return db_session
 
@@ -86,14 +85,14 @@ def read_from_db(file_limit=10):
     return not_decomposed_list
 
 def analyze():
-    for somemessage in whir.message.get_all_messages():
+    for somemessage in whir.message.get_all():
         if not somemessage.decomposed:
             somemessage.decompose()
 
-    logger.info("Total words:" + str(len(whir.word.get_all_words_ids())))
+    logger.info("Total words:" + str(len(whir.word.get_all_ids())))
     logger.info("Total authors:" + str(len(whir.author.get_all_ids())))
     logger.info("Total sources:" + str(len(whir.source.get_all_ids())))
-    logger.info("Total messages:" + str(len(whir.message.get_all_messages())))
+    logger.info("Total messages:" + str(len(whir.message.get_all_ids())))
 
 
 def sync_to_db():
@@ -109,7 +108,19 @@ def sync_to_db():
     db_session.close_db()
     logger.info("DB consistency check finished")
 
+def remove_messages_from_db():
+    db_session = connect_to_db()
+    db_session.remove_messages_from_db()
+    db_session.close_db()
+
+def clear_all():
+    whir.message.clear_all()
+    whir.author.clear_all()
+    whir.source.clear_all()
+    whir.word.clear_all()
+
 if __name__=='__main__':
+
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
     logger = logging.getLogger('decomposer')
@@ -130,13 +141,16 @@ if __name__=='__main__':
 
     else:
         while True:
-            file_limit = 10
+            file_limit_per_1_thread = 16
 
             logger.info("Starting getting not decomposed files list from DB")
-            not_decomposed_list=read_from_db(file_limit)
+            not_decomposed_files_list=read_from_db(file_limit_per_1_thread)
 
-            logger.info("Starting reading of files: " + str(not_decomposed_list))
-            read_files(not_decomposed_list)
+            logger.info("Starting reading of files")
+            read_files(not_decomposed_files_list)
+
+            logger.info("Removing loaded messages from DB")
+            remove_messages_from_db()
 
             logger.info("Starting Parsing and Analysis")
             analyze()
@@ -145,7 +159,10 @@ if __name__=='__main__':
             sync_to_db()
 
             pause_time = 2
-            pause_time += random.randint(1, 20)
+            pause_time += random.randint(1, 30)
+
+            logger.info("Removing all decomposed entities for the next run")
+            clear_all()
 
             logger.info("Sleeping for " + str(pause_time) + " seconds.")
             time.sleep(pause_time)
