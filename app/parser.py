@@ -8,6 +8,7 @@ from whir.db import db
 from whir.db import author
 from whir.db import source
 
+import csv
 import time
 
 
@@ -120,12 +121,12 @@ def parse_input(logger):
     else:
         return False
 
-def parse_files(files,logger):
+def parse_files_index(files_index,logger):
     author = ""
     source = ""
     filename = ""
 
-    for record in files:
+    for record in files_index:
         if record[0]:
             author=record[1]
             source=record[2]
@@ -148,6 +149,30 @@ def connect_to_db():
 
     return db_session
 
+def readcsv(filename='/data/index.csv'):
+    files_index=[]
+
+    streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
+
+    try:
+        row = streamTextFile.readline()
+        while len(row) > 1:
+
+            files_index.append(row.split('|'))
+            row = streamTextFile.readline()
+
+    except BaseException as exc:
+        logger.warning("File " + filename + " cannot read some string: " + str(exc.__str__()))
+        streamTextFile.close()
+
+
+    streamTextFile.close()
+    logger.info("File " + str(filename) + " read - closing it")
+
+    logger.info(files_index)
+    return files_index
+
+
 if __name__=='__main__':
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
@@ -155,11 +180,12 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
+
+    logger.info("Reading Index CSV")
+    files_index=readcsv('/data/index.csv')
+
     logger.info("Parsing Input")
-
-
-    from files import files
-    parse_files(files,logger)
+    parse_files_index(files_index,logger)
 
 #    db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
 #                    host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
