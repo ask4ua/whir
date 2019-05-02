@@ -192,7 +192,6 @@ def writecsv(files_index,filename,logger):
         streamTextFile.write(text)
     except BaseException as exc:
         logger.warning("File " + filename + " cannot write some string due to: " + str(exc.__str__()))
-        logger.warning("String :" + str(row))
         streamTextFile.close()
 
     streamTextFile.close()
