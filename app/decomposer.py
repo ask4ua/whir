@@ -89,16 +89,15 @@ def analyze():
         if not somemessage.decomposed:
             somemessage.decompose()
 
-    logger.info("Total words:" + str(len(whir.word.get_all_ids())))
-    logger.info("Total authors:" + str(len(whir.author.get_all_ids())))
-    logger.info("Total sources:" + str(len(whir.source.get_all_ids())))
-    logger.info("Total messages:" + str(len(whir.message.get_all_ids())))
-
-
 def sync_to_db():
     #db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
     #                host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
     #                database=Configs.actual_config['db_database'])
+
+    logger.info("Total words:" + str(len(whir.word.get_all_ids())))
+    logger.info("Total authors:" + str(len(whir.author.get_all_ids())))
+    logger.info("Total sources:" + str(len(whir.source.get_all_ids())))
+    logger.info("Total messages:" + str(len(whir.message.get_all_ids())))
 
     db_session = connect_to_db()
 

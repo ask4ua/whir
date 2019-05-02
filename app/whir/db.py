@@ -545,7 +545,11 @@ class db_parser:
             logger.info("Starting writing words to DB")
             pointer = 0
 
-            window = 1000 + int(len(new_word_ids)/8)
+            window = int(len(new_word_ids)/8)
+            if window<1000:
+                window=1000
+            elif window > 32000:
+                window=32000
 
 
             try:

@@ -126,14 +126,22 @@ def parse_files_index(files_index,logger):
     source = ""
     filename = ""
 
-    for record in files_index:
-        if record[0]:
-            author=record[1]
-            source=record[2]
-            filename=record[3]
+    for i in range(len(files_index)):
+        if files_index[i][0].lower()=='new':
+
+            author=files_index[i][1]
+            source=files_index[i][2]
+            filename=files_index[i][3]
+
             if author != "" and source != "" and filename != "":
-                if not parse_message(author, source, filename, logger):
+                if parse_message(author, source, filename, logger):
+                    files_index[i][0]="parsed"
+                else:
                     logger.warning("File " + str(filename) + " was skipped!")
+                    files_index[i][0] = "skipped"
+            else:
+                files_index[i][0] = "some fields missed"
+
 
 
 def connect_to_db():
@@ -149,7 +157,7 @@ def connect_to_db():
 
     return db_session
 
-def readcsv(filename='/data/index.csv'):
+def readcsv(filename,logger):
     files_index=[]
 
     streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
@@ -158,13 +166,12 @@ def readcsv(filename='/data/index.csv'):
         row = streamTextFile.readline()
         while len(row) > 1:
 
-            files_index.append(row.split('|'))
+            files_index.append(row.split('|')[0:4])
             row = streamTextFile.readline()
 
     except BaseException as exc:
         logger.warning("File " + filename + " cannot read some string: " + str(exc.__str__()))
         streamTextFile.close()
-
 
     streamTextFile.close()
     logger.info("File " + str(filename) + " read - closing it")
@@ -172,6 +179,41 @@ def readcsv(filename='/data/index.csv'):
     logger.info(files_index)
     return files_index
 
+def writecsv(files_index,filename,logger):
+
+    text=""
+    for row in files_index:
+        for i in range(len(row)):
+            text += row[i] + "|"
+        text+="|\n"
+
+    streamTextFile= open(str(filename), mode='wt',encoding='utf-8')
+    try:
+        streamTextFile.write(text)
+    except BaseException as exc:
+        logger.warning("File " + filename + " cannot write some string due to: " + str(exc.__str__()))
+        logger.warning("String :" + str(row))
+        streamTextFile.close()
+
+    streamTextFile.close()
+
+def sync_to_db():
+    #db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
+    #                host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
+    #                database=Configs.actual_config['db_database'])
+
+    logger.info("Total words:" + str(len(whir.word.get_all_ids())))
+    logger.info("Total authors:" + str(len(whir.author.get_all_ids())))
+    logger.info("Total sources:" + str(len(whir.source.get_all_ids())))
+    logger.info("Total messages:" + str(len(whir.message.get_all_ids())))
+
+    db_session = connect_to_db()
+
+    db_session.sync_all_to_db()
+    db_session.check_sync()
+
+    db_session.close_db()
+    logger.info("DB consistency check finished")
 
 if __name__=='__main__':
     import logging.config
@@ -180,19 +222,20 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
-
     logger.info("Reading Index CSV")
-    files_index=readcsv('/data/index.csv')
+    files_index=readcsv('/data/index.csv',logger)
 
     logger.info("Parsing Input")
     parse_files_index(files_index,logger)
 
-    db_session=connect_to_db()
+    logger.info("Updating CSV")
+    writecsv(files_index, '/data/index.csv', logger)
 
-    db_session.sync_all_to_db()
-    db_session.check_sync()
+    logger.info("Syncing to DB")
+    sync_to_db()
 
-    db_session.close_db()
+
+
 
 
 
