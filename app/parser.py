@@ -195,6 +195,7 @@ def writecsv(files_index,filename,logger):
         streamTextFile.close()
 
     streamTextFile.close()
+    files_index=[]
 
 def sync_to_db():
     #db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
@@ -222,6 +223,7 @@ if __name__=='__main__':
     Configs.load(logger)
 
     while True:
+        files_index=[]
 
         logger.info("Reading Index CSV")
         files_index=readcsv('/data/index.csv',logger)
@@ -235,5 +237,6 @@ if __name__=='__main__':
         logger.info("Syncing to DB")
         sync_to_db()
 
+        logger.info("Sleeping for 5 minutes")
         time.sleep(60*5)
 
