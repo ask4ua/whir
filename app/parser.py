@@ -221,22 +221,19 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
-    logger.info("Reading Index CSV")
-    files_index=readcsv('/data/index.csv',logger)
+    while True:
 
-    logger.info("Parsing Input")
-    parse_files_index(files_index,logger)
+        logger.info("Reading Index CSV")
+        files_index=readcsv('/data/index.csv',logger)
 
-    logger.info("Updating CSV")
-    writecsv(files_index, '/data/index.csv', logger)
+        logger.info("Parsing Input")
+        parse_files_index(files_index,logger)
 
-    logger.info("Syncing to DB")
-    sync_to_db()
+        logger.info("Updating CSV")
+        writecsv(files_index, '/data/index.csv', logger)
 
+        logger.info("Syncing to DB")
+        sync_to_db()
 
-
-
-
-
-
+        time.sleep(60*5)
 
