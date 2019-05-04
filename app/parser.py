@@ -31,7 +31,7 @@ def read_text_from_file(filename,logger):
 
     text=""
     #try:
-    logger.debug("Starting reading TEXT from file")
+    logger.debug("Starting reading TEXT from file " + str(filename))
         
     streamTextFile = open(str(filename), mode='rt')
 
@@ -60,7 +60,7 @@ def write_text_to_file(filename,text,logger):
 
 
 def parse_message(author,source,filename,logger):
-    logger.info("Input file: " + filename)
+    logger.debug("Input file: " + filename)
 
     try:
         somemessage = whir.message(read_text_from_file(filename, logger))
@@ -75,9 +75,9 @@ def parse_message(author,source,filename,logger):
     somemessage.author_id = someauthor.id
     somemessage.source_id = somesource.id
 
-    logger.info("File " + filename + " and it`s hash: " + somemessage.id)
-    logger.info("Author: " + author + " hash: " + somemessage.author_id)
-    logger.info("Source: " + source + " hash: " + somemessage.source_id)
+    logger.debug("File " + filename + " and it`s hash: " + somemessage.id)
+    logger.debug("Author: " + author + " hash: " + somemessage.author_id)
+    logger.debug("Source: " + source + " hash: " + somemessage.source_id)
 
     #try:
         #os_filename=filename.replace(" ","\\ ")
