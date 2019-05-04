@@ -140,7 +140,7 @@ if __name__=='__main__':
 
     else:
         while True:
-            file_limit_per_1_thread = 16
+            file_limit_per_1_thread = 64
 
             logger.info("Starting getting not decomposed files list from DB")
             not_decomposed_files_list=read_from_db(file_limit_per_1_thread)

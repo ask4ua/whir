@@ -545,7 +545,7 @@ class db_parser:
             logger.info("Starting writing words to DB")
             pointer = 0
 
-            window = int(len(new_word_ids)/8)
+            window = int(len(new_word_ids)/8)+7
             if window<1000:
                 window=1000
             elif window > 32000:
@@ -559,11 +559,12 @@ class db_parser:
                     logger.info("Current pointer: " + str(pointer) + " out of " + str(len(new_word_ids)) + " new words for DB.")
                     word_ids = new_word_ids[pointer:pointer + window]
 
+                    wordsinwordSQL = queries.upsert_wordsinword(word_ids)
+                    if wordsinwordSQL != "":
+                        cursor.execute(wordsinwordSQL)
+
                     cursor.execute(queries.upsert_words(word_ids, date))
 
-                    SQL=queries.upsert_wordsinword(word_ids)
-                    if SQL !="":
-                        cursor.execute(SQL)
 
                     sql_session.commit()
                     pointer += window
