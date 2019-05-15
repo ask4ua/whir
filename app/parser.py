@@ -162,21 +162,24 @@ def readcsv(filename,logger):
 
     streamTextFile = open(str(filename), mode='rt', encoding='utf-8')
 
+    rowcnt = 0
     try:
         row = streamTextFile.readline()
         while len(row) > 1:
 
             files_index.append(row.split('|')[0:4])
             row = streamTextFile.readline()
+            rowcnt+=1
 
     except BaseException as exc:
         logger.warning("File " + filename + " cannot read some string: " + str(exc.__str__()))
         streamTextFile.close()
 
-    streamTextFile.close()
-    logger.info("File " + str(filename) + " read - closing it")
 
-    logger.info(files_index)
+    logger.info("CSV file " + str(filename) + " read, length:"+ str(rowcnt) +" - closing it")
+    streamTextFile.close()
+
+    logger.debug(files_index)
     return files_index
 
 def writecsv(files_index,filename,logger):
