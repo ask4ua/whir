@@ -27,7 +27,7 @@ services:
                 image: docker.ask4ua.com/whir-app
                 volumes:
                         - "data_vol:/data"
-                command: "cd /data; /usr/bin/git clone h--single-branch --branch eng-books http://10.5.34.229:1180/root/whir-data; mv whir-data/* ./; rm -rf whir-data"
+                command: "cd /data; /usr/bin/git clone --single-branch --branch eng-books http://10.5.34.229:1180/root/whir-data; mv whir-data/* ./; rm -rf whir-data"
                 networks:
                         - whirnet
 
