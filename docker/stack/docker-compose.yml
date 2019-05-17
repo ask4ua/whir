@@ -23,7 +23,7 @@ services:
                         restart_policy:
                                 condition: any
 
-	data:
+        data:
                 image: docker.ask4ua.com/whir-app
                 volumes:
                         - "data_vol:/data"
