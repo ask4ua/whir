@@ -240,6 +240,9 @@ if __name__=='__main__':
         logger.info("Syncing to DB")
         sync_to_db()
 
+        logger.info("Removing all decomposed entities for the next run")
+        whir.clear_all()
+
         logger.info("Sleeping for 5 minutes")
         time.sleep(60*5)
 

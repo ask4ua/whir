@@ -161,7 +161,7 @@ if __name__=='__main__':
             pause_time += random.randint(1, 30)
 
             logger.info("Removing all decomposed entities for the next run")
-            clear_all()
+            whir.clear_all()
 
             logger.info("Sleeping for " + str(pause_time) + " seconds.")
             time.sleep(pause_time)

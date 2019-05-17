@@ -4,7 +4,6 @@ logger = logging.getLogger('counter')
 
 import hashlib
 
-
 class text_unification:
     # Only Textual Output
 
@@ -349,3 +348,10 @@ class message(id_management):
 
     def __str__(self):
         return "Message " + str(self.id[0:6]) + "..." + self.id[-6:]
+
+
+def clear_all():
+    message.clear_all()
+    author.clear_all()
+    source.clear_all()
+    word.clear_all()
