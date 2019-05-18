@@ -171,7 +171,8 @@ def readcsv(filename,logger):
         row = streamTextFile.readline()
         while len(row) > 1:
 
-            files_index.append(row.split('|')[0:4])
+            files_index.append(row.split('|')[0:4] + [''])
+
             row = streamTextFile.readline()
             rowcnt+=1
 
@@ -233,6 +234,7 @@ if __name__=='__main__':
         files_index=[]
 
         logger.info("Reading Index CSV")
+
         files_index=readcsv('/data/index.csv',logger)
 
         logger.info("Parsing Input")
@@ -246,7 +248,6 @@ if __name__=='__main__':
 
         logger.info("Removing all decomposed entities for the next run")
         whir.clear_all()
-
 
         logger.info("Sleeping for 15 minutes")
         time.sleep(15*60)
