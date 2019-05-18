@@ -193,6 +193,7 @@ def writecsv(files_index,filename,logger):
     for row in files_index:
         for i in range(len(row)):
             text += row[i] + "|"
+        text += "\n"
 
     streamTextFile = open(str(filename), mode='wt',encoding='utf-8')
     try:
@@ -238,7 +239,7 @@ if __name__=='__main__':
         try:
             logger.info("Reading Index CSV")
             files_index=readcsv('/data/index.csv',logger)
-            
+
         except BaseException as exc:
             logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
 
