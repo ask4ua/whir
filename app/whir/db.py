@@ -548,8 +548,8 @@ class db_parser:
             window = int(len(new_word_ids)/8)+7
             if window<1000:
                 window=1000
-            elif window > 32000:
-                window=32000
+            elif window > 10000:
+                window=10000
 
 
             try:
