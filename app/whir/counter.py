@@ -3,6 +3,7 @@ logger = logging.getLogger('counter')
 
 
 import hashlib
+import gc
 
 class text_unification:
     # Only Textual Output
@@ -355,3 +356,5 @@ def clear_all():
     author.clear_all()
     source.clear_all()
     word.clear_all()
+
+    gc.collect()
