@@ -139,7 +139,7 @@ def parse_files_index(files_index,logger):
 
                 if message_id:
                     files_index[i][0]="parsed"
-                    files_index[i][4] = str(message_id)
+                    files_index[i][4]=str(message_id)
                 else:
                     logger.warning("File " + str(filename) + " was skipped!")
                     files_index[i][0] = "skipped"
