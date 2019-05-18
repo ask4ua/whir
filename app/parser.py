@@ -171,7 +171,7 @@ def readcsv(filename,logger):
         row = streamTextFile.readline()
         while len(row) > 1:
 
-            files_index.append(row.split('|')[0:5])
+            files_index.append(row.split('|')[0:4] + [''])
 
             row = streamTextFile.readline()
             rowcnt+=1
