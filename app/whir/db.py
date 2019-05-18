@@ -392,7 +392,7 @@ class queries:
 
         if len(message_ids) > 0:
             for message_id in message_ids:
-                SQL += "update messages set inprogress_flag=TRUE where messages.message_id in ("
+                SQL += "update public.messages set inprogress_flag=TRUE where messages.message_id in ("
                 SQL += "\'" + str(message_id) + "\', "
 
             SQL = SQL[0:-2]
