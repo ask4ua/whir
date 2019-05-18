@@ -231,32 +231,32 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
-    while True:
+    #while True:
 
-        files_index=[]
+    files_index=[]
 
-        try:
-            logger.info("Reading Index CSV")
-            files_index=readcsv('/data/index.csv',logger)
-        except BaseException as exc:
-            logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
+    try:
+        logger.info("Reading Index CSV")
+        files_index=readcsv('/data/index.csv',logger)
+    except BaseException as exc:
+        logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
 
-            logger.info("Sleeping for 1 minute")
-            time.sleep(60)
+        logger.info("Sleeping for 1 minute")
+        time.sleep(60)
 
-        else:
-            logger.info("Parsing Input")
-            parse_files_index(files_index,logger)
+    else:
+        logger.info("Parsing Input")
+        parse_files_index(files_index,logger)
 
-            logger.info("Updating CSV")
-            writecsv(files_index, '/data/index.csv', logger)
+        logger.info("Updating CSV")
+        writecsv(files_index, '/data/index.csv', logger)
 
-            logger.info("Syncing to DB")
-            sync_to_db()
+        logger.info("Syncing to DB")
+        sync_to_db()
 
-            logger.info("Removing all decomposed entities for the next run")
-            whir.clear_all()
+        logger.info("Removing all decomposed entities for the next run")
+        whir.clear_all()
 
-            logger.info("Sleeping for 15 minutes")
-            time.sleep(15*60)
+        logger.info("Sleeping for 15 minutes")
+        time.sleep(15*60)
 

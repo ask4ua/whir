@@ -145,32 +145,32 @@ if __name__=='__main__':
         sync_to_db()
 
     else:
-        while True:
-            file_limit_per_1_thread = 64
+        #while True:
+        file_limit_per_1_thread = 64
 
-            logger.info("Starting getting not decomposed files list from DB")
-            not_decomposed_files_list=read_from_db(file_limit_per_1_thread)
+        logger.info("Starting getting not decomposed files list from DB")
+        not_decomposed_files_list=read_from_db(file_limit_per_1_thread)
 
-            logger.info("Starting reading of files")
-            read_files(not_decomposed_files_list)
+        logger.info("Starting reading of files")
+        read_files(not_decomposed_files_list)
 
-            logger.info("Setting to edit in progress loaded messages from DB")
-            #remove_messages_from_db()
-            inprogress_messages()
+        logger.info("Setting to edit in progress loaded messages from DB")
+        #remove_messages_from_db()
+        inprogress_messages()
 
-            logger.info("Starting Parsing and Analysis")
-            analyze()
+        logger.info("Starting Parsing and Analysis")
+        analyze()
 
-            logger.info("DB starting save to DB")
-            sync_to_db()
+        logger.info("DB starting save to DB")
+        sync_to_db()
 
-            pause_time = 2
-            pause_time += random.randint(1, 30)
+        pause_time = 2
+        pause_time += random.randint(1, 30)
 
-            logger.info("Removing all decomposed entities for the next run")
-            whir.clear_all()
+        logger.info("Removing all decomposed entities for the next run")
+        whir.clear_all()
 
-            logger.info("Sleeping for " + str(pause_time) + " seconds.")
-            time.sleep(pause_time)
+        logger.info("Sleeping for " + str(pause_time) + " seconds.")
+        time.sleep(pause_time)
 
     logger.info("Job is done")
