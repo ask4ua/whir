@@ -193,16 +193,17 @@ def writecsv(files_index,filename,logger):
     for row in files_index:
         for i in range(len(row)):
             text += row[i] + "|"
-        text+="|\n"
 
-    streamTextFile= open(str(filename), mode='wt',encoding='utf-8')
+    streamTextFile = open(str(filename), mode='wt',encoding='utf-8')
     try:
         streamTextFile.write(text)
+
     except BaseException as exc:
         logger.warning("File " + filename + " cannot write some string due to: " + str(exc.__str__()))
         streamTextFile.close()
 
     streamTextFile.close()
+
     files_index=[]
 
 def sync_to_db():

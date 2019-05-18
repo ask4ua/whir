@@ -319,8 +319,6 @@ class message(id_management):
     all_ids={}
 
     def __init__(self,text,language=""):
-
-        self.text=text
         self.unified_text=text_unification.unification(text)
 
         self.id=message.calc_id(unified_text=self.unified_text)
