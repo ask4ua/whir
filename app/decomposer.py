@@ -165,11 +165,11 @@ if __name__=='__main__':
         logger.info("DB starting save to DB")
         sync_to_db()
 
-        pause_time = 2
-        pause_time += random.randint(1, 30)
+        #pause_time = 2
+        #pause_time += random.randint(1, 30)
 
-        logger.info("Removing all decomposed entities for the next run")
-        whir.clear_all()
+        #logger.info("Removing all decomposed entities for the next run")
+        #whir.clear_all()
 
         #logger.info("Sleeping for " + str(pause_time) + " seconds.")
         #time.sleep(pause_time)
