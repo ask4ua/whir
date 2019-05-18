@@ -146,6 +146,7 @@ if __name__=='__main__':
 
     else:
         #while True:
+
         file_limit_per_1_thread = 64
 
         logger.info("Starting getting not decomposed files list from DB")
@@ -170,7 +171,7 @@ if __name__=='__main__':
         logger.info("Removing all decomposed entities for the next run")
         whir.clear_all()
 
-        logger.info("Sleeping for " + str(pause_time) + " seconds.")
-        time.sleep(pause_time)
+        #logger.info("Sleeping for " + str(pause_time) + " seconds.")
+        #time.sleep(pause_time)
 
     logger.info("Job is done")

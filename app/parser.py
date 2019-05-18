@@ -231,18 +231,18 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
-    #while True:
 
-    files_index=[]
+    while True:
+        files_index=[]
 
-    try:
-        logger.info("Reading Index CSV")
-        files_index=readcsv('/data/index.csv',logger)
-    except BaseException as exc:
-        logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
+        try:
+            logger.info("Reading Index CSV")
+            files_index=readcsv('/data/index.csv',logger)
+        except BaseException as exc:
+            logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
 
-        logger.info("Sleeping for 1 minute")
-        time.sleep(60)
+            logger.info("Sleeping for 1 minute")
+            time.sleep(60)
 
     else:
         logger.info("Parsing Input")
@@ -257,6 +257,6 @@ if __name__=='__main__':
         logger.info("Removing all decomposed entities for the next run")
         whir.clear_all()
 
-        logger.info("Sleeping for 15 minutes")
-        time.sleep(15*60)
+        #logger.info("Sleeping for 15 minutes")
+        #time.sleep(15*60)
 
