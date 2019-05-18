@@ -3,6 +3,7 @@ logger = logging.getLogger('counter')
 
 
 import hashlib
+import re
 import gc
 
 class text_unification:
@@ -34,6 +35,12 @@ class text_unification:
 
         ## In such case \n also hidden
         #row_text=' '.join(row_text.split())
+
+        row_text = re.sub(' +', ' ', row_text)
+        row_text = re.sub('\n+', '\n', row_text)
+        row_text = re.sub('\t+', '\t', row_text)
+        row_text = re.sub('-+', '-', row_text)
+
         row_text=row_text.lower()
 
         return row_text
