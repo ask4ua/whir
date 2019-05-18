@@ -140,6 +140,7 @@ class id_management():
             del some
 
         cls.all_ids = {}
+        gc.collect()
 
     @classmethod
     def get_by_id(cls, id=0):
@@ -357,4 +358,3 @@ def clear_all():
     source.clear_all()
     word.clear_all()
 
-    gc.collect()
