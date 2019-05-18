@@ -89,7 +89,8 @@ def parse_message(author,source,filename,logger):
     somemessage.filename = "/data/HASHED/" + somemessage.id + ".txt"
     write_text_to_file(somemessage.filename, somemessage.text, logger)
 
-    return True
+    #return True
+    return somemessage.id
 
 
 def parse_input(logger):
@@ -134,8 +135,11 @@ def parse_files_index(files_index,logger):
             filename=files_index[i][3]
 
             if author != "" and source != "" and filename != "":
-                if parse_message(author, source, filename, logger):
+                message_id=parse_message(author, source, filename, logger)
+
+                if message_id:
                     files_index[i][0]="parsed"
+                    files_index[i][4] = str(message_id)
                 else:
                     logger.warning("File " + str(filename) + " was skipped!")
                     files_index[i][0] = "skipped"
