@@ -321,6 +321,8 @@ class message(id_management):
     def __init__(self,text,language=""):
         self.unified_text=text_unification.unification(text)
 
+        self.text=text
+
         self.id=message.calc_id(unified_text=self.unified_text)
         message.all_ids[self.id] = self
 
