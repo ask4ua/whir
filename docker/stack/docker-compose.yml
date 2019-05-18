@@ -38,7 +38,7 @@ services:
                         replicas: 1
                         restart_policy:
                                 condition: any
-				delay: 900s
+                                delay: 900s
                         placement:
                                 constraints: [node.role == manager]
                 command: "/usr/bin/python3 parser.py"
@@ -63,7 +63,7 @@ services:
                                         #cpus: "0.24"
                         restart_policy:
                                 condition: any
-				delay:	10s
+                                delay: 10s
                 command: "/usr/bin/python3 decomposer.py"
                 volumes:
                         - "data_vol:/data"
