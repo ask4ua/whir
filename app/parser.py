@@ -238,6 +238,8 @@ if __name__=='__main__':
         try:
             logger.info("Reading Index CSV")
             files_index=readcsv('/data/index.csv',logger)
+            break
+
         except BaseException as exc:
             logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
 
