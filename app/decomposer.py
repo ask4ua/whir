@@ -112,6 +112,11 @@ def remove_messages_from_db():
     db_session.remove_messages_from_db()
     db_session.close_db()
 
+def inprogress_messages():
+    db_session = connect_to_db()
+    db_session.inprogress_messages()
+    db_session.close_db()
+
 def clear_all():
     whir.message.clear_all()
     whir.author.clear_all()
@@ -148,8 +153,9 @@ if __name__=='__main__':
             logger.info("Starting reading of files")
             read_files(not_decomposed_files_list)
 
-            logger.info("Removing loaded messages from DB")
-            remove_messages_from_db()
+            logger.info("Setting to edit in progress loaded messages from DB")
+            #remove_messages_from_db()
+            inprogress_messages()
 
             logger.info("Starting Parsing and Analysis")
             analyze()

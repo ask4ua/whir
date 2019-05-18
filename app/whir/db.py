@@ -387,6 +387,20 @@ class queries:
         return SQL
 
     @staticmethod
+    def inprogress_messages(message_ids):
+        SQL=""
+
+        if len(message_ids) > 0:
+            for message_id in message_ids:
+                SQL += "update messages set inprogress_flag=TRUE where message_id in ("
+                SQL += str(message_id) + ", "
+
+            SQL = SQL[0:-2]
+            SQL+=");"
+
+        return SQL
+
+    @staticmethod
     def upsert_messages(message_ids, date):
 
         SQL = "insert into messages (message_id, text, source_id, author_id, filename, creation_date) VALUES\n"
@@ -397,8 +411,7 @@ class queries:
             SQL += "\'" + str(somemessage.author_id) + "\', \'" + str(somemessage.filename) + "\', \'"+ str(date) +"\'),\n"
 
         SQL = SQL[0:-2]
-        SQL += " ON CONFLICT(message_id) DO UPDATE set source_id=\'"+ str(somemessage.source_id) +"\', "
-        SQL += "author_id=\'"+ str(somemessage.author_id)+ "\', text=\'"+ queries.masking(somemessage.unified_text[0:255]) + "\', creation_date=\'"+str(date)+"\';"
+        SQL += " ON CONFLICT(message_id) DO UPDATE set inprogress_flag=FALSE;"
 
         logger.debug("SQL: " + str(SQL))
         return SQL
@@ -439,8 +452,17 @@ class db_parser:
         #cursor.execute("SET character_set_connection=utf8mb4;")
 
     @staticmethod
+    def inprogress_messages(sql_session):
+        logger.info("Setting Messages as in progress taken in work from pool")
+
+        cursor = sql_session.cursor()
+        cursor.execute(queries.inprogress_messages(message.get_all_ids()))
+        sql_session.commit()
+        cursor.close()
+
+    @staticmethod
     def delete_messages(sql_session):
-        logger.debug("Deleting Messages taken in work from pool")
+        logger.info("Deleting Messages taken in work from pool")
 
         cursor = sql_session.cursor()
         cursor.execute(queries.delete_messages(message.get_all_ids()))
@@ -761,6 +783,10 @@ class db:
     def remove_messages_from_db(self):
         if len(message.get_all_ids()) > 0:
             db_parser.delete_messages(self.sql_session)
+
+    def inprogress_messages(self):
+        if len(message.get_all_ids()) > 0:
+            db_parser.inprogress_messages(self.sql_session)
 
     def check_sync(self):
         if len(word.get_all_ids()) > 0:
