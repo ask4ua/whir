@@ -240,6 +240,9 @@ if __name__=='__main__':
         except BaseException as exc:
             logger.warning("Cannot read /data/index.csv: " + str(exc.__str__()))
 
+            logger.info("Sleeping for 1 minute")
+            time.sleep(60)
+
         else:
             logger.info("Parsing Input")
             parse_files_index(files_index,logger)
@@ -253,6 +256,6 @@ if __name__=='__main__':
             logger.info("Removing all decomposed entities for the next run")
             whir.clear_all()
 
-        logger.info("Sleeping for 15 minutes")
-        time.sleep(15*60)
+            logger.info("Sleeping for 15 minutes")
+            time.sleep(15*60)
 
