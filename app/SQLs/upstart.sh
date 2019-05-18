@@ -8,14 +8,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
        primary key (author_id));
 
     CREATE TABLE IF NOT EXISTS messages (
-	message_id character(64) NOT NULL,
-	"text" character varying(4000) DEFAULT NULL::character varying,
-	author_id character(64) DEFAULT NULL::bpchar,
-	source_id character(64) DEFAULT NULL::bpchar,
-	creation_date timestamp without time zone,
-	filename character varying(255) DEFAULT NULL::character varying,
-	inprogress_flag boolean DEFAULT false,
-	PRIMARY KEY(message_id)
+	    message_id character(64) NOT NULL,
+	    "text" character varying(4000) DEFAULT NULL::character varying,
+	    author_id character(64) DEFAULT NULL::bpchar,
+	    source_id character(64) DEFAULT NULL::bpchar,
+	    creation_date timestamp without time zone,
+	    filename character varying(255) DEFAULT NULL::character varying,
+	    inprogress_flag boolean DEFAULT false,
+	    PRIMARY KEY(message_id)
     );
 
     create table IF NOT EXISTS  sources (

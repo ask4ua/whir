@@ -317,7 +317,7 @@ class queries:
 
     @staticmethod
     def get_not_decomposed_message_files(file_limit=1):
-        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null" + " limit " + str(file_limit) + ";"
+        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null and messages.inprogress_flag=FALSE" + " limit " + str(file_limit) + ";"
         return SQL
 
 
