@@ -39,7 +39,6 @@ services:
                         resources:
                                 limits:
                                         cpus: "0.5"
-                                        memory: 512M
                         restart_policy:
                                 condition: on-failure
                         placement:
