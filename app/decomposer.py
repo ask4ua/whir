@@ -103,6 +103,9 @@ def sync_to_db():
     db_session = connect_to_db()
 
     db_session.sync_all_to_db()
+    db_session.close_db()
+
+    db_session = connect_to_db()
     db_session.check_sync()
 
     db_session.close_db()
@@ -148,7 +151,7 @@ if __name__=='__main__':
     else:
         #while True:
 
-        file_limit_per_1_thread = 64
+        file_limit_per_1_thread = 16
 
         #timer to split simulteneously started instances
         pause_time = random.randint(1, 30)

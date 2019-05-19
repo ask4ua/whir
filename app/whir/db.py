@@ -421,7 +421,8 @@ class queries:
     @staticmethod
     def get_count_by_word_ids(word_ids):
 
-        SQL = "SELECT sum(wordsinword.count) \"total\" from wordsinword where mainword_id in ("
+        SQL = "SELECT sum(wordsinword.count) from wordsinword where mainword_id in ("
+
         for word_id in word_ids:
             SQL+='\''+str(word_id)+'\', '
 
@@ -642,8 +643,9 @@ class db_parser:
             for subword_id,count in someword.get_subwords():
                 app_subwords_count+=int(count)
 
-        check_status=False
         all_word_ids = word.get_all_ids()
+
+        check_status=False
         while not check_status:
 
             db_subwords_count = -1
