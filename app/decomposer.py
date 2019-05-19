@@ -149,6 +149,10 @@ if __name__=='__main__':
 
         file_limit_per_1_thread = 64
 
+        #timer to split simulteneously started instances
+        pause_time = random.randint(1, 30)
+        logger.info("Sleeping for " + str(pause_time) + " seconds.")
+
         logger.info("Starting getting not decomposed files list from DB")
         not_decomposed_files_list=read_from_db(file_limit_per_1_thread)
 
@@ -156,7 +160,7 @@ if __name__=='__main__':
         read_files(not_decomposed_files_list)
 
         logger.info("Setting to edit in progress loaded messages from DB")
-        #remove_messages_from_db()
+        # remove_messages_from_db()
         inprogress_messages()
 
         logger.info("Starting Parsing and Analysis")
