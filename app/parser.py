@@ -171,7 +171,14 @@ def readcsv(filename,logger):
         row = streamTextFile.readline()
         while len(row) > 1:
 
-            files_index.append(row.split('|')[0:4] + [''])
+            line_list=row.rstrip().split('|')
+
+            while len(line_list) < 4:
+                line_list += ['']
+
+            files_index.append(line_list[0:4] + [''])
+            # + [''] - for HASH of parsed file
+
 
             row = streamTextFile.readline()
             rowcnt+=1

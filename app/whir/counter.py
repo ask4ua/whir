@@ -41,6 +41,9 @@ class text_unification:
         row_text = re.sub('\t+', '\t', row_text)
         row_text = re.sub('-+', '-', row_text)
 
+        row_text.rstrip()
+        row_text.lstrip()
+
         row_text=row_text.lower()
 
         return row_text
