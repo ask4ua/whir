@@ -113,9 +113,10 @@ def remove_messages_from_db():
     db_session.remove_messages_from_db()
     db_session.close_db()
 
-def inprogress_messages():
+def inprogress_messages(msg_ids):
+
     db_session = connect_to_db()
-    db_session.inprogress_messages()
+    db_session.inprogress_messages(msg_ids)
     db_session.close_db()
 
 def clear_all():
@@ -154,14 +155,22 @@ if __name__=='__main__':
         logger.info("Sleeping for " + str(pause_time) + " seconds.")
 
         logger.info("Starting getting not decomposed files list from DB")
-        not_decomposed_files_list=read_from_db(file_limit_per_1_thread)
+        not_decomposed_ids_files_list=read_from_db(file_limit_per_1_thread)
 
-        logger.info("Starting reading of files")
-        read_files(not_decomposed_files_list)
+        not_decomposed_ids_list=[]
+        not_decomposed_files_list=[]
+
+        for pair in not_decomposed_ids_files_list:
+            not_decomposed_ids_list.append(pair[0])
+            not_decomposed_files_list.append(pair[1])
+
 
         logger.info("Setting to edit in progress loaded messages from DB")
         # remove_messages_from_db()
-        inprogress_messages()
+        inprogress_messages(not_decomposed_ids_list)
+
+        logger.info("Starting reading of files")
+        read_files(not_decomposed_files_list)
 
         logger.info("Starting Parsing and Analysis")
         analyze()

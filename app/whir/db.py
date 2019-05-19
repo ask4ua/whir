@@ -317,7 +317,7 @@ class queries:
 
     @staticmethod
     def get_not_decomposed_message_files(file_limit=1):
-        SQL = "select messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null and messages.inprogress_flag=FALSE" + " limit " + str(file_limit) + ";"
+        SQL = "select messages.message_id, messages.filename from messages left join words on words.word_id=messages.message_id where words.word_id is Null and messages.inprogress_flag=FALSE" + " limit " + str(file_limit) + ";"
         return SQL
 
 
@@ -454,11 +454,11 @@ class db_parser:
         #cursor.execute("SET character_set_connection=utf8mb4;")
 
     @staticmethod
-    def inprogress_messages(sql_session):
+    def inprogress_messages(sql_session,msg_ids):
         logger.info("Setting Messages as in progress taken in work from pool")
 
         cursor = sql_session.cursor()
-        cursor.execute(queries.inprogress_messages(message.get_all_ids()))
+        cursor.execute(queries.inprogress_messages(msg_ids))
         sql_session.commit()
         cursor.close()
 
@@ -697,8 +697,8 @@ class db_parser:
         db_parser.force_utf8mb4(cursor)
         cursor.execute(queries.get_not_decomposed_message_files(file_limit))
 
-        for somefile in cursor:
-            not_decomposed_list.append(somefile[0])
+        for msg_id, somefile in cursor:
+            not_decomposed_list.append([msg_id, somefile])
 
         logger.debug("All not decomposed files:" + str(not_decomposed_list))
         cursor.close()
@@ -786,9 +786,9 @@ class db:
         if len(message.get_all_ids()) > 0:
             db_parser.delete_messages(self.sql_session)
 
-    def inprogress_messages(self):
+    def inprogress_messages(self, msg_ids):
         if len(message.get_all_ids()) > 0:
-            db_parser.inprogress_messages(self.sql_session)
+            db_parser.inprogress_messages(self.sql_session,msg_ids)
 
     def check_sync(self):
         if len(word.get_all_ids()) > 0:
