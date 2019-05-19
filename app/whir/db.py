@@ -634,6 +634,7 @@ class db_parser:
 
     @staticmethod
     def check_save_consistency_words(sql_session):
+        logger.info("Starting sync check for DB")
         WAIT_TIMER=60 #seconds
 
         app_subwords_count=0
