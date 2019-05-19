@@ -787,7 +787,7 @@ class db:
             db_parser.delete_messages(self.sql_session)
 
     def inprogress_messages(self, msg_ids):
-        if len(message.get_all_ids()) > 0:
+        if len(msg_ids) > 0:
             db_parser.inprogress_messages(self.sql_session,msg_ids)
 
     def check_sync(self):
