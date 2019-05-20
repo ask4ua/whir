@@ -490,6 +490,11 @@ class db_parser:
                     cursor.execute(queries.get_new_words_ids_create(all_word_ids))
                     cursor.execute(queries.get_new_words_ids_select())
 
+                    for word_id_tuple in cursor:
+                        new_word_ids.append(word_id_tuple[0])
+
+                    cursor.close()
+
                     collected=True
 
                 except BaseException as err:
@@ -498,10 +503,6 @@ class db_parser:
 
                     logger.info("Sleeping for 1 minute after failed temporary word_id")
                     time.sleep(60)
-
-            for word_id_tuple in cursor:
-                new_word_ids.append(word_id_tuple[0])
-            cursor.close()
 
             logger.info("All words: " + str(len(all_word_ids)) + " - detected as new for db: " + str(len(new_word_ids)))
 
@@ -585,6 +586,7 @@ class db_parser:
                     word_ids = new_word_ids[pointer:pointer + window]
 
                     wordsinwordSQL = queries.upsert_wordsinword(word_ids)
+
                     if wordsinwordSQL != "":
                         cursor.execute(wordsinwordSQL)
 
@@ -600,6 +602,8 @@ class db_parser:
 
             except BaseException as err:
                 logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__()))
+                logger.info("SQL:" + str(wordsinwordSQL))
+
                 cursor.close()
                 return False
 
