@@ -1,5 +1,11 @@
 version: "3.1"
 services:
+        logspout:
+              image: gliderlabs/logspout
+              volumes:
+                      - "/var/run/docker.sock:/tmp/docker.sock"
+              networks:
+                      - whirnet
         data:
                 image: docker.ask4ua.com/whir-app
                 volumes:
