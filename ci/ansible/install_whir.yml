@@ -6,9 +6,26 @@
                     state: directory
           - name: Cloning whir app project
             git: clone=yes repo=http://10.5.33.229:1180/root/whir.git dest=/home/volk/git/whir
-          - name: build docker file
-            shell: cd /home/volk/git/whir && docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile && docker build . -t docker.ask4ua.com/whir-db -f docker/images/db/Dockerfile
+          - name: build docker whir-app image
+            command: docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile
+            args:
+                    chdir: /home/volk/git/whir
+          - name: build docker whir-db image
+            command: docker build . -t docker.ask4ua.com/whir-db -f docker/images/db/Dockerfile
+            args:
+                    chdir: /home/volk/git/whir
           - name: create stack
-            shell: docker swarm init
-          - name: start stack
-            shell: cd /home/volk/git/whir && docker stack deploy whir -c docker/stack/docker-compose.yml
+            command: docker swarm init
+            register: swarm_init_result
+            ignore_errors: True
+          - name: start logspout
+            command: docker run -d --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://10.5.33.42:5000
+          - name: create secrets
+            command: bash docker/usefulscripts.sh 
+            args:
+                    chdir: /home/volk/git/whir
+          - name: start service stack
+            command: docker stack deploy whir -c docker/stack/docker-compose.yml
+            args:
+                    chdir: /home/volk/git/whir
+
