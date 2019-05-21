@@ -1,0 +1,10 @@
+- hosts: dockers
+  tasks:
+    - name: Insatll docker installation dependenices
+      action: apt name={{item}} state=installed
+      with_items:
+              - curl
+    - name: Installs docker
+      shell: curl -fsSL https://get.docker.com | sh -
+    - name: Installs docker repo
+      shell: adduser volk docker
