@@ -7,3 +7,4 @@ select count(*) "Messages In Progress" from messages where messages.inprogress_f
 select count(*) "Total Words" from words;
 select sum(wordsinword.count) "Total wordsinword" from wordsinword;
 
+--update messages set inprogress_flag=False;
