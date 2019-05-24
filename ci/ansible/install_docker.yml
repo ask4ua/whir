@@ -6,5 +6,5 @@
               - curl
     - name: Installs docker
       shell: curl -fsSL https://get.docker.com | sh -
-    - name: Installs docker repo
-      shell: adduser volk docker
+    - name: Installs docker user
+      command: adduser volk docker
