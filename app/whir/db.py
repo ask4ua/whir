@@ -510,7 +510,7 @@ class db_parser:
 
                 SQL = queries.upsert_words(word_ids, date)
                 cursor.execute(SQL)
-            except BaseException as err:
+            except BaseException as exc:
                 logger.error("SQL execution error: " + str(exc.__str__()) +" in write_word_to_db for SQL:" + str(SQL))
                 raise Exception("SQL execution error in write_word_to_db for SQL")
 

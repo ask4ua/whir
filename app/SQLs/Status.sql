@@ -1,5 +1,5 @@
---update messages set inprogress_flag=False;
---delete from words where words.word_id in (select messages.message_id from messages);
+update messages set inprogress_flag=False;
+delete from words where words.word_id in (select messages.message_id from messages);
 
 select count(*) "Messages Total "from messages;
 

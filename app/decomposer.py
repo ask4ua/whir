@@ -131,7 +131,7 @@ def sync_to_db():
             break
         except BaseException as exc:
             db_session.close_db()
-            logger.error("Some exception during sync_to_db" + str(exc.__str__()))
+            logger.error("Some exception during sync_to_db " + str(exc.__str__()))
             logger.info("Retrying to connect to db and check")
 
             logger.info("Sleeping for 10 seconds before retry")
