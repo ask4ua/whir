@@ -102,12 +102,7 @@ def sync_to_db():
         try:
             logger.info("Starting getting New word IDS from DB")
             db_session = connect_to_db()
-            new_word_ids = db_session.get_new_word_ids()
-            db_session.close_db()
-
-            logger.info("Starting writing all to DB")
-            db_session = connect_to_db()
-            db_session.sync_all_to_db(new_word_ids)
+            db_session.sync_all_to_db()
 
         except BaseException as exc:
 

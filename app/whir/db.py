@@ -513,7 +513,7 @@ class db_parser:
             except BaseException as exc:
                 cursor.close()
                 logger.error("SQL execution error: " + str(exc.__str__()) +" in write_word_to_db for SQL:" + str(SQL))
-                raise Exception("SQL execution error in write_word_to_db for SQL")
+                raise Exception(str(exc.__str__()))
 
 
 
@@ -523,12 +523,13 @@ class db_parser:
         cursor.close()
 
     @staticmethod
-    def sync_all_words_to_db(sql_session, date, new_word_ids=word.get_all_ids()):
+    def sync_all_words_to_db(sql_session, date):
 
         logger.debug("Staring saving all new words to db")
         #sorted_new_word_ids = word.get_ids_sorted_desc_by_subwords(new_word_ids)
         #db_parser.write_word_to_db(sorted_new_word_ids, sql_session, date)
 
+        new_word_ids=db_parser.get_new_words(sql_session,word.get_all_ids())
         db_parser.write_words_to_db(new_word_ids, sql_session, date)
 
     @staticmethod
@@ -671,7 +672,7 @@ class db:
         if len(word.get_all_ids()) > 0:
             return db_parser.get_new_words(self.sql_session)
 
-    def sync_all_to_db(self,new_word_ids=word.get_all_ids()):
+    def sync_all_to_db(self):
         time_now = datetime.datetime.now()
         date = time_now.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -682,7 +683,7 @@ class db:
             db_parser.sync_all_sources_to_db(self.sql_session,date)
 
         if len(word.get_all_ids()) > 0:
-            db_parser.sync_all_words_to_db(self.sql_session,date,new_word_ids)
+            db_parser.sync_all_words_to_db(self.sql_session,date)
 
         if len(message.get_all_ids()) > 0:
             db_parser.sync_all_messages_to_db(self.sql_session,date)
