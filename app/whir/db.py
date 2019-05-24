@@ -642,6 +642,7 @@ class db_parser:
         logger.info("Starting sync check for DB")
         WAIT_TIMER=60 #seconds
 
+        logger.info("Collecting Local Statistics")
         app_subwords_count=0
         for someword in word.get_all():
             for subword_id,count in someword.get_subwords():
@@ -656,6 +657,8 @@ class db_parser:
 
             cursor = sql_session.cursor()
             db_parser.force_utf8mb4(cursor)
+
+            logger.info("Retrieving check counter from DB")
             cursor.execute(queries.get_count_by_word_ids(all_word_ids))
 
             for result in cursor:

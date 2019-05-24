@@ -235,7 +235,7 @@ def sync_to_db():
 if __name__=='__main__':
     import logging.config
     logging.config.fileConfig('conf/logging.conf')
-    logger = logging.getLogger('root')
+    logger = logging.getLogger('parser')
 
     Configs.load(logger)
 
