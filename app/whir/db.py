@@ -487,20 +487,14 @@ class db_parser:
 
         cursor.close()
 
-        logger.info("From total words: " + str(len(all_word_ids)) + " - detected as new for db only: " + str(len(new_word_ids)))
+        logger.info("From total words: " + str(len(all_word_ids)) + " only "+ str(len(new_word_ids)) + " detected as new for db.")
 
         return new_word_ids
 
     @staticmethod
-    def write_words_to_db(new_word_ids, sql_session, date, window=1000):
+    def write_words_to_db(new_word_ids, sql_session, date, window=10000):
         logger.info("Starting writing words to DB")
         pointer = 0
-
-        window = int(len(new_word_ids) / 8) + 7
-        if window < 1000:
-            window = 1000
-        elif window > 10000:
-            window = 10000
 
         cursor = sql_session.cursor()
 
@@ -508,12 +502,19 @@ class db_parser:
             logger.info("Current pointer: " + str(pointer) + " out of " + str(len(new_word_ids)) + " new words for DB.")
             word_ids = new_word_ids[pointer:pointer + window]
 
-            wordsinwordSQL = queries.upsert_wordsinword(word_ids)
+            try:
+                SQL = queries.upsert_wordsinword(word_ids)
 
-            if wordsinwordSQL != "":
-                cursor.execute(wordsinwordSQL)
+                if SQL != "":
+                    cursor.execute(SQL)
 
-            cursor.execute(queries.upsert_words(word_ids, date))
+                SQL = queries.upsert_words(word_ids, date)
+                cursor.execute(SQL)
+            except BaseException as err:
+                logger.error("SQL execution error: " + str(exc.__str__()) +" in write_word_to_db for SQL:" + str(SQL))
+                raise Exception("SQL execution error in write_word_to_db for SQL")
+
+
 
             sql_session.commit()
             pointer += window
