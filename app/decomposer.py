@@ -79,10 +79,9 @@ def read_from_db(file_limit=10):
     #                database=Configs.actual_config['db_database'])
     
     db_session = connect_to_db()
-
     not_decomposed_list = db_session.get_not_decomposed_messages(file_limit)
-
     db_session.close_db()
+
     return not_decomposed_list
 
 def analyze():
@@ -94,22 +93,54 @@ def sync_to_db():
     #db_session = db(user=Configs.actual_config['db_user'], password=Configs.actual_config['db_password'],
     #                host=Configs.actual_config['db_host'], port=Configs.actual_config['db_port'],
     #                database=Configs.actual_config['db_database'])
-
     logger.info("Total words:" + str(len(whir.word.get_all_ids())))
     logger.info("Total authors:" + str(len(whir.author.get_all_ids())))
     logger.info("Total sources:" + str(len(whir.source.get_all_ids())))
     logger.info("Total messages:" + str(len(whir.message.get_all_ids())))
 
-    db_session = connect_to_db()
+    while True:
+        try:
+            logger.info("Starting getting New word IDS from DB")
+            db_session = connect_to_db()
+            new_word_ids = db_session.get_new_word_ids()
+            db_session.close_db()
 
-    db_session.sync_all_to_db()
-    db_session.close_db()
+            logger.info("Starting writing all to DB")
+            db_session = connect_to_db()
+            db_session.sync_all_to_db(new_word_ids)
 
-    db_session = connect_to_db()
-    db_session.check_sync()
+        except BaseException as exc:
 
-    db_session.close_db()
-    logger.info("DB consistency check finished")
+            db_session.close_db()
+            logger.error("Some exception during sync_to_db" + str(exc.__str__()))
+            logger.info("Retrying to connect to db and sync")
+
+            logger.info("Sleeping for 10 seconds before retry")
+            time.sleep(10)
+
+        else:
+            logger.info("Writing to DB finished")
+            break
+
+    logger.info("Starting after writing to DB consistency checks")
+    while True:
+        try:
+            db_session = connect_to_db()
+            db_session.check_sync()
+
+            break
+        except BaseException as exc:
+            db_session.close_db()
+            logger.error("Some exception during sync_to_db" + str(exc.__str__()))
+            logger.info("Retrying to connect to db and check")
+
+            logger.info("Sleeping for 10 seconds before retry")
+            time.sleep(10)
+
+        else:
+            db_session.close_db()
+            logger.info("DB consistency check finished")
+            break
 
 def remove_messages_from_db():
     db_session = connect_to_db()
