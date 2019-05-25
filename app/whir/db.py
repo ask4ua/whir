@@ -472,170 +472,66 @@ class db_parser:
         sql_session.commit()
         cursor.close()
 
+    @staticmethod
+    def get_new_words(sql_session,all_word_ids=word.get_all_ids()):
+        new_word_ids = []
+
+        cursor = sql_session.cursor()
+        # iterator=cursor.execute(queries.get_new_words_ids_in_one_try(all_word_ids),multi=True)
+
+        cursor.execute(queries.get_new_words_ids_create(all_word_ids))
+        cursor.execute(queries.get_new_words_ids_select())
+
+        for word_id_tuple in cursor:
+            new_word_ids.append(word_id_tuple[0])
+
+        cursor.close()
+
+        logger.info("From total words: " + str(len(all_word_ids)) + " only "+ str(len(new_word_ids)) + " detected as new for db.")
+
+        return new_word_ids
 
     @staticmethod
-    def sync_all_words_to_db(sql_session, date,temp_prefix=""):
+    def write_words_to_db(new_word_ids, sql_session, date, window=1024):
+        logger.info("Starting writing words to DB")
+        pointer = 0
 
-        logger.debug("Staring saving all words to db")
+        cursor = sql_session.cursor()
 
-        def get_new_words(all_word_ids, sql_session):
-            new_word_ids=[]
-
-            collected=False
-            while not collected:
-                try:
-                    cursor = sql_session.cursor()
-                    #iterator=cursor.execute(queries.get_new_words_ids_in_one_try(all_word_ids),multi=True)
-
-                    cursor.execute(queries.get_new_words_ids_create(all_word_ids))
-                    cursor.execute(queries.get_new_words_ids_select())
-
-                    for word_id_tuple in cursor:
-                        new_word_ids.append(word_id_tuple[0])
-
-                    cursor.close()
-
-                    collected=True
-
-                except BaseException as err:
-                    logger.warning("Exception with temporary word_id catched: " + str(err.__str__()))
-                    cursor.close()
-
-                    logger.info("Sleeping for 1 minute after failed temporary word_id")
-                    time.sleep(60)
-
-            logger.info("All words: " + str(len(all_word_ids)) + " - detected as new for db: " + str(len(new_word_ids)))
-
-            return new_word_ids
-
-
-        # def write_word_to_db(new_word_ids,sql_session,date,temp_prefix=""):
-        #     logger.info("Starting words to DB")
-        #
-        #     cursor = sql_session.cursor()
-        #     db_parser.force_utf8mb4(cursor)
-        #     # mysql.connector.errors.IntegrityError: 1062 (23000): Duplicate entry '83c01...e7b5' for key 'PRIMARY'
-        #     # in such case repeat new words and try again
-        #
-        #     try:
-        #         temp_prefix = random.randint(100000,999999)
-        #         logger.info("Created temp prefix for merging: " + str(temp_prefix))
-        #
-        #         temp_words = str(temp_prefix) + "_words"
-        #         temp_wordsinword = str(temp_prefix) + "_wordsinword"
-        #
-        #         cursor.execute(queries.create_new_words_table(temp_words))
-        #         cursor.execute(queries.create_new_wordsinword_table(temp_wordsinword))
-        #
-        #         window=1000
-        #         pointer=0
-        #
-        #         logger.info("Inserting Words and Wordsinwords to intermediate table")
-        #         while pointer < len(new_word_ids):
-        #             word_ids = new_word_ids[pointer:pointer+window]
-        #             #cursor.execute(queries.insert_words(word_ids, date))
-        #             #cursor.execute(queries.delete_words([word_id]))
-        #             cursor.execute(queries.insert_words(word_ids, date,temp_words))
-        #
-        #             #cursor.execute(queries.insert_word_in_word([word_id]))
-        #             #cursor.execute(queries.delete_wordsinword(word_id))
-        #             cursor.execute(queries.insert_wordsinword(word_ids,temp_wordsinword))
-        #
-        #             pointer += window
-        #
-        #         sql_session.commit()
-        #
-        #         logger.info("Merging Words and Wordsinwords with intermediate table")
-        #         cursor.execute(queries.merge_the_tables(temp_words,"words"))
-        #         cursor.execute(queries.merge_the_tables(temp_wordsinword, "wordsinword"))
-        #         sql_session.commit()
-        #
-        #         logger.info("Dropping Words and Wordsinwords intermediate table")
-        #         cursor.execute(queries.drop_the_table(temp_words))
-        #         cursor.execute(queries.drop_the_table(temp_wordsinword))
-        #         cursor.close()
-        #         return True
-        #
-        #     except mysql.connector.Error as err:
-        #         logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__() + " " + str(err.errno)))
-        #         logger.info("SQL: " + str(cursor.statement))
-        #
-        #         logger.info("Dropping Words and Wordsinwords intermediate table")
-        #         cursor.execute(queries.drop_the_table(temp_words))
-        #         cursor.execute(queries.drop_the_table(temp_wordsinword))
-        #
-        #         cursor.close()
-        #         return False
-
-        def write_word_to_db(new_word_ids, sql_session, date, window=1000):
-            logger.info("Starting writing words to DB")
-            pointer = 0
-
-            window = int(len(new_word_ids)/8)+7
-            if window<1000:
-                window=1000
-            elif window > 10000:
-                window=10000
-
+        while pointer < len(new_word_ids):
+            logger.info("Current pointer: " + str(pointer) + " out of " + str(len(new_word_ids)) + " new words for DB.")
+            word_ids = new_word_ids[pointer:pointer + window]
 
             try:
-                cursor = sql_session.cursor()
+                SQL = queries.upsert_wordsinword(word_ids)
 
-                while pointer < len(new_word_ids):
-                    logger.info("Current pointer: " + str(pointer) + " out of " + str(len(new_word_ids)) + " new words for DB.")
-                    word_ids = new_word_ids[pointer:pointer + window]
+                if SQL != "":
+                    cursor.execute(SQL)
 
-                    wordsinwordSQL = queries.upsert_wordsinword(word_ids)
-
-                    if wordsinwordSQL != "":
-                        cursor.execute(wordsinwordSQL)
-
-                    cursor.execute(queries.upsert_words(word_ids, date))
-
-
-                    sql_session.commit()
-                    pointer += window
-
+                SQL = queries.upsert_words(word_ids, date)
+                cursor.execute(SQL)
+            except BaseException as exc:
                 cursor.close()
-
-                return True
-
-            except BaseException as err:
-                logger.warning("Exception for insert words, wordsinword catched: " + str(err.__str__()))
-                logger.info("SQL:" + str(wordsinwordSQL))
-
-                cursor.close()
-                return False
+                logger.error("SQL execution error: " + str(exc.__str__()) +" in write_word_to_db for SQL:" + str(SQL))
+                raise Exception(str(exc.__str__()))
 
 
 
+            sql_session.commit()
+            pointer += window
 
-        words_synced=False
+        cursor.close()
 
-        all_word_ids = word.get_all_ids()
+    @staticmethod
+    def sync_all_words_to_db(sql_session, date):
 
-        #if len(new_word_ids) == 0:
-        if len(all_word_ids) == 0:
-            logger.info("0 word_ids identified to insert")
-        else:
-            logger.info("Starting writing to DB all new words")
+        logger.debug("Staring saving all new words to db")
+        #db_parser.write_word_to_db(sorted_new_word_ids, sql_session, date)
 
-            WAIT_TIMER = 0
-
-            while not words_synced:
-                new_word_ids = get_new_words(all_word_ids,sql_session)
-                sorted_new_word_ids = word.get_ids_sorted_desc_by_subwords(new_word_ids)
-
-                words_synced=write_word_to_db(sorted_new_word_ids, sql_session, date)
-
-                if not words_synced:
-
-                    WAIT_TIMER += random.randint(1, 60)
-                    logger.warning("Starting Word Insert waiting timer for " + str(WAIT_TIMER) + " seconds.")
-                    time.sleep(WAIT_TIMER)
-
-
-
+        new_word_ids=db_parser.get_new_words(sql_session,word.get_all_ids())
+        sorted_new_word_ids = word.get_ids_sorted_desc_by_subwords(new_word_ids)
+        logger.debug("Staring saving all new words to db")
+        db_parser.write_words_to_db(sorted_new_word_ids, sql_session, date)
 
     @staticmethod
     def check_save_consistency_words(sql_session):
@@ -770,13 +666,14 @@ class db:
 
 
         except BaseException as err:
-            logger.error("DB ERROR: Something is wrong: " + str(err.__str__()))
+            logger.error("DB ERROR: Something is wrong in connecting to DB: " + str(err.__str__()))
 
 
-    def create_temp_table(self):
-        pass
+    def get_new_word_ids(self):
+        if len(word.get_all_ids()) > 0:
+            return db_parser.get_new_words(self.sql_session)
 
-    def sync_all_to_db(self,temp_prefix=""):
+    def sync_all_to_db(self):
         time_now = datetime.datetime.now()
         date = time_now.strftime('%Y-%m-%d %H:%M:%S')
 
