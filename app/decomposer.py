@@ -101,13 +101,14 @@ def sync_to_db():
     while True:
         try:
             logger.info("Starting getting New word IDS from DB")
+
             db_session = connect_to_db()
             db_session.sync_all_to_db()
 
         except BaseException as exc:
 
             db_session.close_db()
-            logger.error("Some exception during sync_to_db" + str(exc.__str__()))
+            logger.error("Some exception during sync_to_db " + str(exc.__str__()))
             logger.info("Retrying to connect to db and sync")
 
             logger.info("Sleeping for 10 seconds before retry")
@@ -117,7 +118,7 @@ def sync_to_db():
             logger.info("Writing to DB finished")
             break
 
-    logger.info("Starting after writing to DB consistency checks")
+    logger.info("Starting DB consistency checks after writing")
     while True:
         try:
             db_session = connect_to_db()

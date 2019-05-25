@@ -492,7 +492,7 @@ class db_parser:
         return new_word_ids
 
     @staticmethod
-    def write_words_to_db(new_word_ids, sql_session, date, window=10000):
+    def write_words_to_db(new_word_ids, sql_session, date, window=1024):
         logger.info("Starting writing words to DB")
         pointer = 0
 
@@ -526,11 +526,12 @@ class db_parser:
     def sync_all_words_to_db(sql_session, date):
 
         logger.debug("Staring saving all new words to db")
-        #sorted_new_word_ids = word.get_ids_sorted_desc_by_subwords(new_word_ids)
         #db_parser.write_word_to_db(sorted_new_word_ids, sql_session, date)
 
         new_word_ids=db_parser.get_new_words(sql_session,word.get_all_ids())
-        db_parser.write_words_to_db(new_word_ids, sql_session, date)
+        sorted_new_word_ids = word.get_ids_sorted_desc_by_subwords(new_word_ids)
+        logger.debug("Staring saving all new words to db")
+        db_parser.write_words_to_db(sorted_new_word_ids, sql_session, date)
 
     @staticmethod
     def check_save_consistency_words(sql_session):
