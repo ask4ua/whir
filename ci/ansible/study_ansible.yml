@@ -1,0 +1,12 @@
+- hosts: CR
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+          - name: touch home file "{{ item }}"
+            command: touch {{item}}
+            loop:
+                - studyfile1
+                - studyfile2
+            ignore_errors: True
+

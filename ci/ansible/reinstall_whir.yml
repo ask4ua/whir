@@ -1,0 +1,12 @@
+ - hosts: CR
+   roles:
+           - { role: cr }
+ - hosts: dockers
+   roles:
+           - { role: docker }
+ - hosts: elks
+   roles:
+           - { role: elk }
+ - hosts: whirs
+   roles:
+           - { role: whir }

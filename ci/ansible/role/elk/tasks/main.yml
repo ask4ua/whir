@@ -1,0 +1,8 @@
+- hosts: elks
+  tasks:
+         - name: Installs elastics search
+           command: docker run --name es -d -p 9200:9200 -p 9300:9300 ehazlett/elasticsearch
+         - name: Installs kibana
+           command: docker run --name kibana -d -p 80:80 ehazlett/kibana
+         - name: Installs logstash
+           command: docker run -d --name logstash -p 5000:5000/udp --link es:elasticsearch ehazlett/logstash -f /etc/logstash.conf.sample
