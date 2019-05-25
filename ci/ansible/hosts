@@ -12,12 +12,7 @@ whir
 
 [elks]
 elk
-elkstudy
-
-[pgs]
-pgstudy
 
 [dockers:children]
 whirs
 elks
-pgs
