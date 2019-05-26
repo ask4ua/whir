@@ -7,7 +7,7 @@ pipeline {
     	registry = "docker.ask4ua.com/whir-app"
     }
     stages {
-        stage('Build docker image') {
+        stage('Build') {
             steps {
 		docker.build registry + ":$BUILD_NUMBER"	
             }
