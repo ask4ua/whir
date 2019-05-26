@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-		docker.build registry + ":$BUILD_NUMBER"	
+		docker.build registry + ":latest"	
             }
         }
         stage('Test') {
