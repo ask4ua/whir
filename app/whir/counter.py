@@ -81,7 +81,7 @@ class text_unification:
         # below also collecting it`s combinations
 
     def just_combine(simple_split,separators):
-        logger.info("Combining text of such sublocks amount: " + str(len(simple_split)))
+        logger.debug("Combining text of such sublocks amount: " + str(len(simple_split)))
 
         subphrases_and_words=[]
 
@@ -108,7 +108,7 @@ class text_unification:
                 counter+=1
                 logger.debug("Just Combine counter: " + str(counter))
 
-        logger.info("Total combinations: " + str(len(subphrases_and_words)))
+        logger.debug("Total combinations: " + str(len(subphrases_and_words)))
 
         return subphrases_and_words
 
