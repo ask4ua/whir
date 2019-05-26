@@ -3,13 +3,10 @@ pipeline {
     options {
         skipStagesAfterUnstable()
     }
-    environment {
-    	registry = "docker.ask4ua.com/whir-app"
-    }
     stages {
         stage('Build') {
             steps {
-		docker.build registry + ":latest"	
+		docker.build "docker.ask4ua.com/whir-app:latest"	
             }
         }
         stage('Test') {
