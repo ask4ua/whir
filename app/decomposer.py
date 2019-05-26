@@ -5,6 +5,9 @@ import sys
 import time
 import random
 
+import logging.config
+logging.config.fileConfig('conf/logging.conf')
+logger = logging.getLogger('decomposer')
 
 import whir.counter as whir
 from whir.db import db
@@ -119,6 +122,7 @@ def sync_to_db():
             break
 
     logger.info("Starting DB consistency checks after writing")
+
     while True:
         try:
             db_session = connect_to_db()
@@ -156,14 +160,7 @@ def clear_all():
     whir.word.clear_all()
 
 if __name__=='__main__':
-
-    import logging.config
-    logging.config.fileConfig('conf/logging.conf')
-    logger = logging.getLogger('decomposer')
-
     Configs.load(logger)
-
-    logger.info("Starting ...")
 
     if len(sys.argv) > 1:
         logger.info("Starting reading of files: " + str(sys.argv[1:]))
