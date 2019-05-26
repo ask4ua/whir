@@ -3,16 +3,13 @@ pipeline {
     options {
         skipStagesAfterUnstable()
     }
+    environment {
+    	registry = "docker.ask4ua.com/whir-app"
+    }
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'docker.ask4ua.com/whir-app'
-                }
-            }
+        stage('Build docker image') {
             steps {
-		sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-		
+		docker.build registry + ":$BUILD_NUMBER"	
             }
         }
         stage('Test') {
@@ -22,22 +19,7 @@ pipeline {
                 }
             }
             steps {
-		sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-            }
-        }
-        stage('Deliver') { 
-            agent {
-                docker {
-                    image 'cdrx/pyinstaller-linux:python2' 
-                }
-            }
-            steps {
-                sh 'pyinstaller --onefile sources/add2vals.py' 
-            }
-            post {
-                success {
-                    archiveArtifacts 'dist/add2vals' 
-                }
+		sh 'python3 /app/whir/counter.py'
             }
         }
     }
