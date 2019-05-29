@@ -52,7 +52,7 @@ class text_unification:
         for separator in separators:
             if len(unified_text.split(separator)) > count:
                 logger.debug("deeper decompose is required for word: " + str(unified_text))
-                return subwords
+                return True
 
         return False
 
