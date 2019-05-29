@@ -306,7 +306,7 @@ class word(id_management):
                         logger.debug(str(someword.unified_text) + " counted " + str(self.__subwords[someword.id]) + " time inside " + str(self.unified_text))
 
                     if not someword.decomposed_flag:
-                        someword.decompose(decomposing_level)
+                        someword.decompose()
                     #msg.word_used_in_text(someword.unified_text)
 
                 logger.debug("Finished decomposing of word of such lenght:" + str(len(self.unified_text)))
