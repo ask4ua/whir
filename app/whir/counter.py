@@ -293,7 +293,6 @@ class word(id_management):
                     logger.warning("Text not identified as blok, sentense, phrase or word!")
                     self.type = 'more deep than word'
 
-
                 for submessage in submessages:
 
                     # if some text block already in db - no sence to decompose it for the 2-nd time!
@@ -307,13 +306,12 @@ class word(id_management):
                         logger.debug(str(someword.unified_text) + " counted " + str(self.__subwords[someword.id]) + " time inside " + str(self.unified_text))
 
                     if not someword.decomposed_flag:
-                        someword.decompose()
+                        someword.decompose(decomposing_level)
                     #msg.word_used_in_text(someword.unified_text)
 
-                #logger.info("Finished decomposing of word of such lenght:" + str(len(self.unified_text)))
+                logger.debug("Finished decomposing of word of such lenght:" + str(len(self.unified_text)))
                 break
 
-                #add to msg self_id
             decomposing_level += 1
 
         self.decomposed_flag = True
