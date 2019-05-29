@@ -2,8 +2,7 @@ Text="""Multiline, prechecked - but will all symbols, text like: " symbol, ' sym
     Why is it written? To proceed with 'unit tests'!)
     Check and Count for sure.
     
-    P.S.: and blah, blah, blah.
-"""
+    P.S.: and blah, blah, blah."""
 
 Decomposition = \
     {

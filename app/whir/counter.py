@@ -52,7 +52,7 @@ class text_unification:
         for separator in separators:
             if len(unified_text.split(separator)) > count:
                 logger.debug("deeper decompose is required for word: " + str(unified_text))
-                return True
+                return subwords
 
         return False
 
@@ -315,6 +315,7 @@ class word(id_management):
             decomposing_level += 1
 
         self.decomposed_flag = True
+        self.text=""
 
 
         #logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
@@ -371,6 +372,7 @@ class message(id_management):
     def decompose(self):
         text_word=word.safe_create(self.text)
         text_word.decompose()
+
         self.decomposed=True
 
         #for wordphrase in text_unification.splitting(text_word.unified_text,text_unification.all_words_separator):
