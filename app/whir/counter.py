@@ -278,7 +278,8 @@ class word(id_management):
         # word_ids, count
 
         for separator in text_unification.separators:
-            if text_unification.split_check(self.unified_text,separators=separator):
+            separators = separator[0:1]
+            if text_unification.split_check(self.unified_text,separators):
 
                 if decomposing_level==0:
                     self.type='block'
@@ -300,7 +301,7 @@ class word(id_management):
                 #print("Block type: " + str(self.type))
                 #print("Separators: " + str(separator))
 
-                submessages = text_unification.full_splitting(self.unified_text, separator)
+                submessages = text_unification.full_splitting(self.unified_text, separators)
 
                 #print("submessages: + " + str(submessages))
 
