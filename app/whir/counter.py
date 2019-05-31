@@ -284,7 +284,7 @@ class word(id_management):
 
                 if decomposing_level==0:
                     self.type='block'
-                    submessages = text_unification.simple_split(self.unified_text, separators)
+                    submessages = text_unification.just_split(self.unified_text, separators)
 
                 else:
                     if decomposing_level==1:
