@@ -11,8 +11,7 @@ vatra
 whir
 
 [elks]
-elk
+whir
 
 [dockers:children]
 whirs
-elks

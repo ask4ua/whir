@@ -1,3 +1,12 @@
+          - name: Create External Swap
+            command: mkswap /dev/vdb 
+
+          - name: Attach Swap
+            command: swapon /dev/vdb 
+
+          - name: Register Swap in fstab
+            shell: sed -i -e 's/\/swap.img/\/dev\/vdb/g' /etc/fstab
+
           - name: Creates directory /home/volk/git/whir
             remote_user: volk
             file:
@@ -5,7 +14,12 @@
                     state: directory
           - name: Cloning whir app project
             remote_user: volk
-            git: clone=yes repo=http://10.5.33.229:1180/root/whir.git dest=/home/volk/git/whir
+            command: git clone http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
+            retries: 3
+            delay: 3
+            retries: 3
+            register: result
+            until: result.rc == 0
           - name: build docker whir-app image
             command: docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile
             args:
@@ -18,8 +32,10 @@
             command: docker swarm init
             register: swarm_init_result
             ignore_errors: True
+
           - name: start logspout
-            command: docker run -d --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://10.5.33.42:5000
+            command: docker run -d --restart always --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://127.0.0.1:5000
+
           - name: create secrets
             remote_user: volk
             command: bash docker/usefulscripts.sh 
