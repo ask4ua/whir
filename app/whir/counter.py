@@ -284,7 +284,7 @@ class word(id_management):
 
                 if decomposing_level==0:
                     self.type='block'
-                    submessages = text_unification.simple_splitting(self.unified_text, separators)
+                    submessages = text_unification.simple_split(self.unified_text, separators)
 
                 else:
                     if decomposing_level==1:
@@ -300,7 +300,7 @@ class word(id_management):
                         logger.warning("Text not identified as blok, sentense, phrase or word!")
                         self.type = 'more deep than word'
 
-                    submessages = text_unification.simple_split(self.unified_text, separators)
+                    submessages = text_unification.full_splitting(self.unified_text, separators)
 
                 #print("submessages: + " + str(submessages))
 
