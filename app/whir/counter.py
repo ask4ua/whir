@@ -31,7 +31,9 @@ class text_unification:
 
         for separators in text_unification.separators:
             for separator in separators:
-                row_text = row_text.replace(str(separator),separators[0])
+                if separator!=separators[0]:
+                    row_text = row_text.replace(str(separator),separators[0])
+
                 #print("Unified text 1, separator:" + str(separator) + ": " + row_text)
 
                 pattern = '[' + separators[0] + ']' + '{2,}'
@@ -282,25 +284,23 @@ class word(id_management):
 
                 if decomposing_level==0:
                     self.type='block'
-
-                elif decomposing_level==1:
-                    self.type = 'sentense'
-
-                elif decomposing_level==2:
-                    self.type = 'phrase'
-
-                elif decomposing_level==3:
-                    self.type='word'
+                    submessages = text_unification.simple_splitting(self.unified_text, separators)
 
                 else:
-                    logger.warning("Text not identified as blok, sentense, phrase or word!")
-                    self.type = 'more deep than word'
+                    if decomposing_level==1:
+                        self.type = 'sentense'
 
-                #print("Text: '" + str(self.text) + "'")
-                #print("Block type: " + str(self.type))
-                #print("Separators: " + str(separator))
+                    elif decomposing_level==2:
+                        self.type = 'phrase'
 
-                submessages = text_unification.full_splitting(self.unified_text, separators)
+                    elif decomposing_level==3:
+                        self.type='word'
+
+                    else:
+                        logger.warning("Text not identified as blok, sentense, phrase or word!")
+                        self.type = 'more deep than word'
+
+                    submessages = text_unification.simple_split(self.unified_text, separators)
 
                 #print("submessages: + " + str(submessages))
 
