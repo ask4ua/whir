@@ -175,7 +175,7 @@ if __name__=='__main__':
     else:
         #while True:
 
-        file_limit_per_1_thread = 4
+        file_limit_per_1_thread = 1
 
         #timer to split simulteneously started instances
         pause_time = random.randint(1, 30)
