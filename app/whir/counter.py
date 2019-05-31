@@ -202,7 +202,6 @@ class word(id_management):
     #id - object_link
 
     def __init__(self, text):
-        self.text=str(text)
         self.unified_text = text_unification.unification(text)
         self.id = word.calc_id(unified_text=self.unified_text)
         word.all_ids[self.id] = self
@@ -325,7 +324,6 @@ class word(id_management):
                 decomposing_level += 1
 
         self.decomposed_flag = True
-        self.text=""
 
 
         #logger.debug("subowrds for word " + str(self.unified_text) + " is " + str(self.__subwords))
