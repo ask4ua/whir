@@ -7,16 +7,14 @@ import gc
 
 class text_unification:
     # Only Textual Output
-
-
     #block_separators = ['\r','\t','\n']
 
     # [0] separator is used to add to the end of line for sure
 
     block_separators = ['\n','\t']
-    sentense_separators = ['.','!','?','...'] + block_separators[:]
-    phrase_separators = [',',':', ';','- ','\"','\'','\(','\)','\{','\}','\[','\]'] + sentense_separators[:]
-    words_in_phrase_separators = [' '] + phrase_separators[:]
+    sentense_separators = ['.','!','?','...']
+    phrase_separators = [',',':', ';','- ','\"','\'','(',')','{','}','[',']']
+    words_in_phrase_separators = [' ']
 
     separators=[block_separators,sentense_separators,phrase_separators,words_in_phrase_separators]
 
@@ -31,54 +29,64 @@ class text_unification:
         ## In such case \n also hidden
         #row_text=' '.join(row_text.split())
 
-        for separator in text_unification.phrase_separators:
-            row_text=row_text.replace(str(separator),' ')
+        for separators in text_unification.separators:
+            for separator in separators:
+                row_text = row_text.replace(str(separator),separators[0])
+                #print("Unified text 1, separator:" + str(separator) + ": " + row_text)
 
-        row_text = re.sub(' +', ' ', row_text)
-        #row_text = re.sub('\n+', '\n', row_text)
-        #row_text = re.sub('\t+', '\t', row_text)
-        #row_text = re.sub('-+', '-', row_text)
+                pattern = '[' + separators[0] + ']' + '{2,}'
+                # sequental multiple occurence
 
-        row_text = row_text.rstrip()
-        row_text = row_text.lstrip()
+                row_text = re.sub(pattern,separators[0],row_text)
+                #print("Unified text 2, separator:" + str(separator) + ": " + row_text)
+
+                row_text = row_text.rstrip(separators[0])
+                #print("Unified text 3, separator:" + str(separator) + ": " + row_text)
+
+                row_text = row_text.lstrip(separators[0])
+                #print("Unified text 4, separator:" + str(separator) + ": " + row_text)
 
         row_text=row_text.lower()
 
+        #print("Unified text end:" + row_text)
         return row_text
 
-    def split_check(unified_text, separators=[' ']):
+    def split_check(text, separators):
         # check is pslitting required
         count = 1
         for separator in separators:
-            if len(unified_text.split(separator)) > count:
-                logger.debug("deeper decompose is required for word: " + str(unified_text))
-                return True
+            count_subwords=0
+            for subword in text.split(separator):
+                if subword != "":
+                    count_subwords+=1
+
+                    if count_subwords>count:
+                        logger.debug("deeper decompose is required for word: " + str(text))
+                        return True
 
         return False
 
-    def just_split(unified_text,separators):
-        length_for_splitting=len(unified_text)
+    def just_split(text,separators):
+        length_for_splitting=len(text)
         logger.debug("Simply splitting text of some length: " + str(length_for_splitting) + " with separators: " + str(separators))
 
         simple_split = []
-        simple_split.append(unified_text)
+        simple_split.append(text)
 
         for separator in separators:
             splitted_text_list = []
-            for some_text in simple_split:
-                for some_splitted_text in str(some_text).split(separator):
 
-                    text=text_unification.unification(some_splitted_text)
-                    if text != "":
-                        splitted_text_list.append(text)
+            for some_text in simple_split:
+                for more_splitted_text in some_text.split(separator):
+                    if more_splitted_text != "":
+
+                        splitted_text_list.append(str(more_splitted_text))
 
             simple_split = splitted_text_list.copy();
 
         logger.debug("Total subelements of simple split: " + str(len(simple_split)))
         return simple_split
 
-        # now collected all cases
-        # below also collecting it`s combinations
 
     def just_combine(simple_split,separators):
         logger.debug("Combining text of such sublocks amount: " + str(len(simple_split)))
@@ -99,7 +107,7 @@ class text_unification:
 
                 subphrase = ""
                 for wordphrase_combination in simple_split[firstword:lastword]:
-                    subphrase += str(wordphrase_combination)
+                    subphrase += wordphrase_combination
                     subphrase += separators[0]
                     pass
 
@@ -112,15 +120,13 @@ class text_unification:
 
         return subphrases_and_words
 
-    def full_splitting(unified_text, separators):
+    def full_splitting(text, separators):
 
-
-        simple_split = text_unification.just_split(unified_text, separators)
+        simple_split = text_unification.just_split(text, separators)
         subphrases_and_words = text_unification.just_combine(simple_split, separators)
 
-
         logger.debug(
-            "For word " + str(unified_text) + " identified such subwords: " + str(simple_split + subphrases_and_words))
+            "For word " + str(text) + " identified such subwords: " + str(simple_split + subphrases_and_words))
 
         return simple_split + subphrases_and_words
 
@@ -265,36 +271,40 @@ class word(id_management):
         logger.info("Sorting word_ids by subwords count descending - Finished")
         return sorted_word_ids
 
-    def decompose(self,decomposing_level=0):
+    def decompose(self):
+        decomposing_level = 0
         self.__subwords = {}
+
         # word_ids, count
 
         for separator in text_unification.separators:
-            if text_unification.split_check(self.text,separators=separator):
+            if text_unification.split_check(self.unified_text,separators=separator):
 
                 if decomposing_level==0:
-                    submessages = text_unification.just_split(self.text,separator)
                     self.type='block'
 
                 elif decomposing_level==1:
-                    submessages = text_unification.full_splitting(self.text, separator)
                     self.type = 'sentense'
 
                 elif decomposing_level==2:
-                    submessages = text_unification.full_splitting(self.text, separator)
                     self.type = 'phrase'
 
                 elif decomposing_level==3:
-                    submessages = text_unification.full_splitting(self.text, separator)
                     self.type='word'
 
                 else:
-                    submessages = text_unification.full_splitting(self.text, separator)
                     logger.warning("Text not identified as blok, sentense, phrase or word!")
                     self.type = 'more deep than word'
 
-                for submessage in submessages:
+                #print("Text: '" + str(self.text) + "'")
+                #print("Block type: " + str(self.type))
+                #print("Separators: " + str(separator))
 
+                submessages = text_unification.full_splitting(self.unified_text, separator)
+
+                #print("submessages: + " + str(submessages))
+
+                for submessage in submessages:
                     # if some text block already in db - no sence to decompose it for the 2-nd time!
                     someword = word.safe_create(submessage)
 
@@ -307,12 +317,11 @@ class word(id_management):
 
                     if not someword.decomposed_flag:
                         someword.decompose()
-                    #msg.word_used_in_text(someword.unified_text)
 
                 logger.debug("Finished decomposing of word of such lenght:" + str(len(self.unified_text)))
                 break
-
-            decomposing_level += 1
+            else:
+                decomposing_level += 1
 
         self.decomposed_flag = True
         self.text=""
@@ -389,7 +398,7 @@ def clear_all():
 
 if __name__== '__main__':
     #starting selftest
-    print("Starting Self Unit Tests")
+    logger.debug("Starting Self Unit Tests")
 
     from junit import Text as text
     from junit import Decomposition as golden_decomposition
@@ -422,7 +431,7 @@ if __name__== '__main__':
 
     if check_status and len(actual_decomposition)!=len(golden_decomposition):
         check_status = False
-        print("Actual decomposition is longer than golden one: " + str(len(actual_decomposition)) + " to " + str(len(golden_decomposition)))
+        logger.debug("Actual decomposition is longer than golden one: " + str(len(actual_decomposition)) + " to " + str(len(golden_decomposition)))
 
     if check_status:
         print("Self Check: PASSED")
