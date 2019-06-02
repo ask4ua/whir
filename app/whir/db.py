@@ -518,7 +518,7 @@ class db_parser:
 
 
             sql_session.commit()
-            pointer += window
+            pointer += window + 128
 
         cursor.close()
 
