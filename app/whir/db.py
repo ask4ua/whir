@@ -515,8 +515,6 @@ class db_parser:
                 logger.error("SQL execution error: " + str(exc.__str__()) +" in write_word_to_db for SQL:" + str(SQL))
                 raise Exception(str(exc.__str__()))
 
-
-
             sql_session.commit()
             pointer += window + 128
 
