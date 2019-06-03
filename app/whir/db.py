@@ -516,7 +516,9 @@ class db_parser:
                 raise Exception(str(exc.__str__()))
 
             sql_session.commit()
-            pointer += window + 128
+
+            pointer += window
+            window += 128
 
         cursor.close()
 
