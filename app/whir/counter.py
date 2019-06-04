@@ -286,11 +286,12 @@ class word(id_management):
                     self.type='block'
                     submessages = text_unification.just_split(self.unified_text, separators)
 
-                else:
-                    if decomposing_level==1:
-                        self.type = 'sentense'
+                elif decomposing_level==1:
+                    self.type = 'sentense'
+                    submessages = text_unification.just_split(self.unified_text, separators)
 
-                    elif decomposing_level==2:
+                else:
+                    if decomposing_level==2:
                         self.type = 'phrase'
 
                     elif decomposing_level==3:
