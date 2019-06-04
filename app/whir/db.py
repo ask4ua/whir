@@ -355,7 +355,7 @@ class queries:
         SQL = "insert into " + str(table_name) + " (word_id, text, creation_date) values "
         for someword_id in word_ids:
             someword = word.get_by_id(someword_id)
-            SQL += "(\'" + str(someword.id) + "\', \'" + queries.masking(someword.unified_text[0:255]) + "\', \'" + str(date) + "\'), "
+            SQL += "(\'" + str(someword.id) + "\', \'" + queries.masking(someword.unified_text)[0:256] + "\', \'" + str(date) + "\'), "
 
         SQL = SQL[0:-2]
         SQL += " ON CONFLICT(word_id) DO NOTHING;"
@@ -409,7 +409,7 @@ class queries:
         for message_id in message_ids:
             somemessage = message.get_by_id(message_id)
 
-            SQL += "(\'" + str(message_id) + "\', \'" + queries.masking(somemessage.unified_text[0:255]) + "\', \'" + str(somemessage.source_id) + "\', "
+            SQL += "(\'" + str(message_id) + "\', \'" + queries.masking(somemessage.unified_text)[0:256] + "\', \'" + str(somemessage.source_id) + "\', "
             SQL += "\'" + str(somemessage.author_id) + "\', \'" + str(somemessage.filename) + "\', \'"+ str(date) +"\'),\n"
 
         SQL = SQL[0:-2]
