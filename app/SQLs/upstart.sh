@@ -4,12 +4,12 @@ set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
         create table IF NOT EXISTS public.authors (
         author_id varchar(64) not null,
-       author_name varchar(255) default null,
+       author_name character varying(256) DEFAULT NULL::character varying,
        primary key (author_id));
 
     CREATE TABLE IF NOT EXISTS messages (
 	    message_id character(64) NOT NULL,
-	    "text" character varying(4000) DEFAULT NULL::character varying,
+	    "text" character varying(256) DEFAULT NULL::character varying,
 	    author_id character(64) DEFAULT NULL::bpchar,
 	    source_id character(64) DEFAULT NULL::bpchar,
 	    creation_date timestamp without time zone,
@@ -20,12 +20,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 
     create table IF NOT EXISTS  sources (
         source_id varchar(64) not null,
-       source_name varchar(255) default null,
+       source_name character varying(256) DEFAULT NULL::character varying,
        primary key (source_id));
 
     create table IF NOT EXISTS  words (
         word_id char(64) not null,
-       text varchar(4000) default null,
+       text character varying(256) DEFAULT NULL::character varying,
        creation_date timestamp default null,
        primary key (word_id));
 
