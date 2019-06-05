@@ -80,6 +80,11 @@ secrets:
         
 volumes:
         postgres_vol:
-        data_vol:
+#                driver: local
+#                driver_opts:
+#                        type: none
+#                        device: /mnt/8T/whir/volumes/data_vol
+#                        o: bind
+	data_vol:
 networks:
         whirnet:
