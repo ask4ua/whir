@@ -8,8 +8,8 @@ spec:
 	containers:
 	- name: data
       volumeMounts:
-      - mountPath: /data
-        name: data_vol
+      - name: data_vol
+        mountPath: /data
       image: docker.ask4ua.com/whir-app
       command: "/bin/bash /app/clone.sh"
 	- name: parser
@@ -23,8 +23,11 @@ spec:
       - name: WHIR_DB_HOST
         value: postgres
       volumeMounts:
-      - mountPath: /data
-        name: data_vol
+      - name: secret-volume
+        readOnly: true
+        mountPath: "/run/secrets"
+      - name: data_vol
+        mountPath: /data
       image: docker.ask4ua.com/whir-app
       command: "/usr/bin/python3 parser.py"
     - name: decomposer
@@ -38,8 +41,11 @@ spec:
       - name: WHIR_DB_HOST
         value: postgres
       volumeMounts:
-      - mountPath: /data
-        name: data_vol
+      - name: secret-volume
+        readOnly: true
+        mountPath: "/run/secrets"
+      - name: data_vol
+        mountPath: /data
       image: docker.ask4ua.com/whir-app
       command: "/usr/bin/python3 decomposer.py"
     - name: postgres
@@ -53,8 +59,11 @@ spec:
       - name: POSTGRES_ROOT_PASSWORD_FILE
         value: /run/secrets/root_db_password
       volumeMounts:
-      - mountPath: /var/lib/postgresql/data
-        name: postgres_vol
+      - name: secret-volume
+        readOnly: true
+        mountPath: "/run/secrets"
+      - name: postgres_vol
+        mountPath: /var/lib/postgresql/data
       image: docker.ask4ua.com/whir-db
       ports:
       - containerPort: 5432
