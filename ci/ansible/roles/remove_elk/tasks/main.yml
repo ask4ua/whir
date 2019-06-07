@@ -1,0 +1,13 @@
+- name: Stop {{item}} docker
+  command: docker stop {{item}}
+  loop:
+    - es
+    - kibana
+    - logstash
+
+- name: Delete {{item}} docker
+  command: docker rm {{item}}
+  loop:
+    - es
+    - kibana
+    - logstash

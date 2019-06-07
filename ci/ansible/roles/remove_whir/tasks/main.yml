@@ -1,0 +1,23 @@
+- name: Stop docker stack whir
+  command: docker stack rm whir
+
+- name: Pause for 1 minute - give time for docker to stop comtaimer
+  pause: minutes=1
+
+- name: Docker stop unstopped whir containers
+  cammand: for ID in $(docker ps | grep whir | awk '{print $1}'); do docker stop $ID; done
+
+- name: Docker rm containers
+  command: for ID in $(docker ps -a | grep whir | awk '{print $1}'); do docker rm $ID; done
+
+- name: Delete {{item}} whir volume
+  command: docker volume rm {{item}}
+  loop:
+    - whir_data_vol
+    - whir_postgres_vol
+
+- name: Delete {{item}} whir image
+  command: docker image rm {{item}}
+  loop:
+    - docker.ask4ua.com/whir-app
+    - docker.ask4ua.com/whir-db

@@ -1,0 +1,8 @@
+- name: Installs elastics search
+  command: docker run --name es --restart always --detach -p 9200:9200 -p 9300:9300 ehazlett/elasticsearch
+
+- name: Installs kibana
+  command: docker run --name kibana --restart always --detach -p 80:80 ehazlett/kibana
+
+- name: Installs logstash
+  command: docker run --name logstash --restart always --detach -p 5000:5000/udp --link es:elasticsearch ehazlett/logstash -f /etc/logstash.conf.sample
