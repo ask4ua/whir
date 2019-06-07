@@ -1,11 +1,11 @@
  - hosts: elks
    roles:
-    - docker
+    - docker_install
     - elk_install
 
  - hosts: whirs
    roles:
-    - docker
+    - docker_install
     - whir_remove
     - logspout_install
     - whir_install
