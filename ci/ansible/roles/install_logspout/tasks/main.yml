@@ -8,5 +8,5 @@
   ignore_errors: True
 
 - name: start logspout
-  command: docker run -d --restart always --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://127.0.0.1:5000
+  command: docker run -d --restart always --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://10.5.33.42:5000
   when: logspout_status|failed
