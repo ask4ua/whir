@@ -9,8 +9,21 @@
   command: git clone http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
   retries: 3
   delay: 3
-  register: result
+  register: git_clone
   until: result.rc == 0
+
+- name: Pull if git exists
+  remote_user: volk
+  command: git pull master
+  args:
+          chdir: /home/volk/git/whir
+  when: git_clone is failed
+
+- name: Checkout master branch
+  remote_user: volk
+  command: git checkout master
+  args:
+          chdir: /home/volk/git/whir
 
 - name: build docker whir-app image
   command: docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile
