@@ -9,7 +9,6 @@
   command: git clone http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
   retries: 3
   delay: 3
-  retries: 3
   register: result
   until: result.rc == 0
 
