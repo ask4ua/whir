@@ -1,6 +1,7 @@
  - hosts: elks
    remote_user: root
-   roles: install_docker
+   roles:
+    - {role: install_docker}
 
  - hosts: elks
     roles:
