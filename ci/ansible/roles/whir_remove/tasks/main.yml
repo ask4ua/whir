@@ -1,5 +1,6 @@
   - name: Stop docker stack whir
     command: docker stack rm whir
+    ignore_errors: True
 
   - name: Pause for 1 minute - give time for docker to stop comtaimer
     pause: minutes=1
