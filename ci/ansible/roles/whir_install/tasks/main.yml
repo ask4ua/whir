@@ -36,12 +36,10 @@
   args:
           chdir: /home/volk/git/whir
 
-- name: create stack
+- name: Swarm Init
   command: docker swarm init
   register: swarm_init_result
   ignore_errors: True
-
-
 
 - name: create secrets
   remote_user: volk
@@ -49,7 +47,7 @@
   args:
           chdir: /home/volk/git/whir
 
-- name: start service stack
+- name: start Whir stack
   command: docker stack deploy whir -c docker/stack/docker-compose.yml
   args:
           chdir: /home/volk/git/whir
