@@ -41,14 +41,12 @@
   register: swarm_init_result
   ignore_errors: True
 
-- name: start logspout
-  command: docker run -d --restart always --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout syslog://127.0.0.1:5000
-
 - name: create secrets
   remote_user: volk
   command: bash docker/usefulscripts.sh
   args:
           chdir: /home/volk/git/whir
+          
 - name: start service stack
   command: docker stack deploy whir -c docker/stack/docker-compose.yml
   args:
