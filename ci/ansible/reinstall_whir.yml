@@ -1,8 +1,9 @@
- - hosts: elks
-   remote_user: root
-   roles:
-    - {role: install_docker}
+- name: Installing docker where it is needed
+  hosts: elks
+  remote_user: root
+  roles: install_docker
 
+- name: Installing ELK and whir where it is needed
  - hosts: elks
     roles:
       - install_elk
