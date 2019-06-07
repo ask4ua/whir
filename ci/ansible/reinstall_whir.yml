@@ -1,4 +1,5 @@
  - hosts: elks
+   remote_user: root
    roles: docker
 
  - hosts: elks
