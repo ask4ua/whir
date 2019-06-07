@@ -5,7 +5,7 @@
     pause: minutes=1
 
   - name: Docker stop unstopped whir containers
-    cammand: for ID in $(docker ps | grep whir | awk '{print $1}'); do docker stop $ID; done
+    command: for ID in $(docker ps | grep whir | awk '{print $1}'); do docker stop $ID; done
 
   - name: Docker rm containers
     command: for ID in $(docker ps -a | grep whir | awk '{print $1}'); do docker rm $ID; done
