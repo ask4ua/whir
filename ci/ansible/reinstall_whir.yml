@@ -1,7 +1,9 @@
  - hosts: elks
-   roles:
-    - install_docker
-    - install_elk
+   roles: docker
+   remote_user: root
+
+ - hosts: elks
+   roles: install_elk
 
  - hosts: whirs
    roles:
