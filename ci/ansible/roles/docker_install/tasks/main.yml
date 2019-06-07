@@ -17,9 +17,7 @@
 
  - name: Install docker installation dependenices
    remote_user: root
-   action: apt name={{item}} state=installed
-   with_items:
-           - curl
+   action: apt name=['curl'] state=installed
    when: docker_status is failed
 
  - name: Installs docker

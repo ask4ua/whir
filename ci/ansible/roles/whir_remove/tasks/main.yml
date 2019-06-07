@@ -17,6 +17,7 @@
     loop:
       - whir_data_vol
       - whir_postgres_vol
+    ignore_errors: True
 
   - name: Delete {{item}} whir image
     command: docker image rm {{item}}
