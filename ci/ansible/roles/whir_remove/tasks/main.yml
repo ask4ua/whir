@@ -24,3 +24,4 @@
     loop:
       - docker.ask4ua.com/whir-app
       - docker.ask4ua.com/whir-db
+    ignore_errors: True
