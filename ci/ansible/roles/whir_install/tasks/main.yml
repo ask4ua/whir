@@ -10,9 +10,9 @@
   retries: 3
   delay: 3
   register: git_clone
-  until: result.rc == 0
+  until: git_clone.rc == 0
 
-- name: Pull if git exists
+- name: Pull if git clone falied
   remote_user: volk
   command: git pull master
   args:

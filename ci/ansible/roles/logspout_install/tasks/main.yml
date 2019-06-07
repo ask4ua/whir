@@ -1,11 +1,15 @@
 - name: check logspout is running
   command: docker ps | grep logspout
-  register: logspout_status
+  register: logspout_running_status
   ignore_errors: True
+
+- name: Stop logspout
+  command: docker stop logspout
+  when: logspout_running_status is passed
 
 - name: Remove logspout
   command: docker rm logspout
-  when: logspout_status is failed
+  when: logspout_running_status is failed
   ignore_errors: True
 
 - name: start logspout
