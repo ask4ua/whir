@@ -1,10 +1,10 @@
  - hosts: elks
    roles:
-   - remove_elk
-   - install_elk
+    - remove_elk
+    - install_elk
 
  - hosts: whirs
    roles:
-   - remove_whir
-   - install_logspout
-   - install_whir
+    - remove_whir
+    - install_logspout
+    - install_whir
