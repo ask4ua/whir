@@ -9,8 +9,10 @@
   command: git clone http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
   retries: 3
   delay: 3
-  register: git_clone
   until: git_clone.rc == 0
+  failed_when: "'already exists' in command_result.stderr"
+  register: git_clone
+  ignore_errors: True
 
 - name: Pull if git clone falied
   remote_user: volk
