@@ -1,6 +1,5 @@
  - hosts: elks
    roles:
-    - remove_elk
     - install_elk
 
  - hosts: whirs

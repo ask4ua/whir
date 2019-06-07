@@ -1,3 +1,19 @@
+- name: Stop {{item}} docker
+  command: docker stop {{item}}
+  loop:
+    - es
+    - kibana
+    - logstash
+  ignore_errors: True
+
+- name: Delete {{item}} docker
+  command: docker rm {{item}}
+  loop:
+    - es
+    - kibana
+    - logstash
+  ignore_errors: True
+
 - name: Installs elastics search
   command: docker run --name es --restart always --detach -p 9200:9200 -p 9300:9300 ehazlett/elasticsearch
 
