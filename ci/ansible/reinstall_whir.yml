@@ -1,11 +1,15 @@
- - hosts: elks
-   roles: docker
+ #- hosts: elks
+ #  roles: docker
+ #  #   remote_user: root
 
  - hosts: elks
-   roles: install_elk
+   roles:
+    - docker
+    - install_elk
 
  - hosts: whirs
    roles:
     - remove_whir
     - install_logspout
     - install_whir
+
