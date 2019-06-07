@@ -15,11 +15,6 @@
    action: reboot
    when: apt_lock is failed
 
- - name: Install docker installation dependenices
-   remote_user: root
-   action: apt name=['curl'] state=installed
-   when: docker_status is failed
-
  - name: Installs docker
    remote_user: root
    shell: curl -fsSL https://get.docker.com | sh -
