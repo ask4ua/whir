@@ -1,8 +1,8 @@
 - name: Install prereqizites
   remote_user: root
-  - hosts: elks
-       remote_user: root
-       roles: docker
+    - hosts: elks
+         remote_user: root
+         roles: docker
 
 - name: Install Appplications
  - hosts: elks
