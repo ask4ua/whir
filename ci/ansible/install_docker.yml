@@ -1,3 +1,0 @@
- - hosts: dockers
-   roles:
-           - { role: docker }
