@@ -26,16 +26,6 @@
   args:
           chdir: /home/volk/git/whir
 
-- name: build docker whir-app image
-  command: docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile
-  args:
-          chdir: /home/volk/git/whir
-
-- name: build docker whir-db image
-  command: docker build . -t docker.ask4ua.com/whir-db -f docker/images/db/Dockerfile
-  args:
-          chdir: /home/volk/git/whir
-
 - name: Swarm Init
   command: docker swarm init
   register: swarm_init_result
