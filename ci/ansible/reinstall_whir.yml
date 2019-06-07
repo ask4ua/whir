@@ -1,8 +1,7 @@
  - hosts: elks
-   roles: install_docker
-
- - hosts: elks
-   roles: install_elk
+   roles:
+    - install_docker
+    - install_elk
 
  - hosts: whirs
    roles:
