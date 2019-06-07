@@ -1,6 +1,5 @@
  - hosts: elks
    roles: install_docker
-   remote_user: root
 
  - hosts: elks
    roles: install_elk
