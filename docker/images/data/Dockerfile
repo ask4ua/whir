@@ -1,3 +1,3 @@
 FROM docker.ask4ua.com/whir-app 
 WORKDIR /app
-CMD clone.sh
+CMD ["/app/clone.sh"]
