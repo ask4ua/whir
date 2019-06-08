@@ -17,9 +17,9 @@ services:
                 #        - whir_db_password
                 #        - root_db_password
                 environment:
-                        - WHIR_DB_USER=whir
-                        - WHIR_DB_NAME=whir
-                        - WHIR_DB_PASSWORD=password
+                        - POSTGRES_USER=whir
+                        - POSTGRES_DB=whir
+                        - POSTGRES_PASSWORD=password
                 networks:
                         - whirnet
                 deploy:
@@ -64,9 +64,9 @@ services:
                 #secrets:
                 #        - whir_db_password
                 environment:
-                        - POSTGRES_USER=whir
-                        - POSTGRES_DB=whir
-                        - POSTGRES_PASSWORD=password
+                        - WHIR_DB_USER=whir
+                        - WHIR_DB_NAME=whir
+                        - WHIR_DB_PASSWORD=password
                 networks:
                         - whirnet
 secrets:
