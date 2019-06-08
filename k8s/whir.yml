@@ -8,64 +8,82 @@ spec:
   containers:
   - name: data
     image: docker.ask4ua.com/whir-data
-          volumeMounts:
-    - name: data_vol
+    volumeMounts:
+    - name: data-vol
       mountPath: /data
   - name: parser
     env:
     - name: WHIR_DB_USER
-      value: whir
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
     - name: WHIR_DB_NAME
-      value: whir
-    - name: WHIR_DB_PASSWORD_FILE
-      value: /run/secrets/WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
     - name: WHIR_DB_HOST
-      value: postgres
+      value: 127.0.0.1
     volumeMounts:
-    - name: secrets_vol
-      readOnly: true
-      mountPath: "/run/secrets"
-    - name: data_vol
+    - name: data-vol
       mountPath: /data
     image: docker.ask4ua.com/whir-parser
   - name: decomposer
     env:
     - name: WHIR_DB_USER
-      value: whir
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
     - name: WHIR_DB_NAME
-      value: whir
-    - name: WHIR_DB_PASSWORD_FILE
-      value: /run/secrets/WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
     - name: WHIR_DB_HOST
-      value: postgres
+      value: 127.0.0.1
     volumeMounts:
-    - name: secrets_vol
-      readOnly: true
-      mountPath: "/run/secrets"
-    - name: data_vol
+    - name: data-vol
       mountPath: /data
     image: docker.ask4ua.com/whir-decomposer
   - name: postgres
     env:
-    - name: WHIR_DB_USER
-      value: whir
-    - name: WHIR_DB_NAME
-      value: whir
-    - name: WHIR_DB_PASSWORD_FILE
-      value: /run/secrets/WHIR_DB_PASSWORD
-    - name: POSTGRES_ROOT_PASSWORD_FILE
-      value: /run/secrets/POSTGRES_ROOT_PASSWORD
+    - name: POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
     volumeMounts:
-    - name: secrets_vol
-      readOnly: true
-      mountPath: "/run/secrets"
-    - name: postgres_vol
+    - name: postgres-vol
       mountPath: /var/lib/postgresql/data
     image: docker.ask4ua.com/whir-db
     ports:
     - containerPort: 5432
       hostPort: 5432
   volumes:
-  - name: secrets_vol
+  - name: secrets-vol
     secret:
       secretName: whir-pass
+  - name: postgres-vol
+  - name: data-vol

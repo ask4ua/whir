@@ -68,8 +68,9 @@ def connect_to_db():
     user=str(os.environ['WHIR_DB_USER'])
     database=str(os.environ['WHIR_DB_NAME'])
     host=str(os.environ['WHIR_DB_HOST'])
-    filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
-    passwd=read_text_from_file(filename).strip()
+    #filename = str(os.environ['WHIR_DB_PASSWORD_FILE'])
+    #passwd=read_text_from_file(filename).strip()
+    passwd = str(os.environ['WHIR_DB_PASSWORD'])
     
     #logger.info("Whir: Host: "+ str(host) + " User: "+ str(user)+ " db: "+ str(database)+ " passwd: "+ str(passwd) +" ;" )
     db_session = db(user=user, password=passwd,host=host,database=database)
