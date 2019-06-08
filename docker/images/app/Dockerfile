@@ -1,5 +1,4 @@
 FROM ubuntu:18.04 
-WORKDIR /app
 VOLUME /app 
 VOLUME /data
 ENV TZ=Europe/Kiev

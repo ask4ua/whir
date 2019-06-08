@@ -1,10 +1,10 @@
 version: "3.1"
 services:
         data:
-                image: docker.ask4ua.com/whir-app
+                image: docker.ask4ua.com/whir-data
                 volumes:
                         - "data_vol:/data"
-                command: "/bin/bash /app/clone.sh"
+                #command: "/bin/bash /app/clone.sh"
                 networks:
                         - whirnet
         postgres:
@@ -29,7 +29,7 @@ services:
                                 condition: any
         parser:
       # replace username/repo:tag with your name and image details
-                image: docker.ask4ua.com/whir-app
+                image: docker.ask4ua.com/whir-parser
                 deploy:
                         replicas: 1
                         restart_policy:
@@ -37,7 +37,7 @@ services:
                                 delay: 900s
                         placement:
                                 constraints: [node.role == manager]
-                command: "/usr/bin/python3 parser.py"
+                #command: "/usr/bin/python3 parser.py"
                 volumes:
                         - "data_vol:/data"
                 secrets:
@@ -51,7 +51,7 @@ services:
                         - whirnet
         decomposer:
       # replace username/repo:tag with your name and image details
-                image: docker.ask4ua.com/whir-app
+                image: docker.ask4ua.com/whir-decomposer
                 deploy:
                         replicas: 1
                         #resources:
@@ -60,7 +60,7 @@ services:
                         restart_policy:
                                 condition: any
                                 delay: 10s
-                command: "/usr/bin/python3 decomposer.py"
+                #command: "/usr/bin/python3 decomposer.py"
                 volumes:
                         - "data_vol:/data"
                 secrets:
