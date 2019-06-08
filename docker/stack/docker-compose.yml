@@ -20,6 +20,7 @@ services:
                         - POSTGRES_USER=whir
                         - POSTGRES_DB=whir
                         - POSTGRES_PASSWORD=password
+
                 networks:
                         - whirnet
                 deploy:
@@ -45,6 +46,7 @@ services:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
                         - WHIR_DB_PASSWORD=password
+                        - WHIR_DB_HOST=postgres
                 networks:
                         - whirnet
         decomposer:
@@ -67,6 +69,7 @@ services:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
                         - WHIR_DB_PASSWORD=password
+                        - WHIR_DB_HOST=postgres
                 networks:
                         - whirnet
 secrets:
