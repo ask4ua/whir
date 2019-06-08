@@ -13,9 +13,9 @@ services:
                         - 5432:5432
                 volumes:
                         - postgres_vol:/var/lib/postgresql/data
-                secrets:
-                        - whir_db_password
-                        - root_db_password
+                #secrets:
+                #        - whir_db_password
+                #        - root_db_password
                 environment:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
@@ -39,8 +39,8 @@ services:
                 #command: "/usr/bin/python3 parser.py"
                 volumes:
                         - "data_vol:/data"
-                secrets:
-                        - whir_db_password
+                #secrets:
+                #        - whir_db_password
                 environment:
                         - WHIR_DB_USER=whir
                         - WHIR_DB_NAME=whir
@@ -61,8 +61,8 @@ services:
                 #command: "/usr/bin/python3 decomposer.py"
                 volumes:
                         - "data_vol:/data"
-                secrets:
-                        - whir_db_password
+                #secrets:
+                #        - whir_db_password
                 environment:
                         - POSTGRES_USER=whir
                         - POSTGRES_DB=whir
