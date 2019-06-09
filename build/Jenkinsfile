@@ -11,7 +11,7 @@ pipeline {
         }
         stage('Build whir-app image') {
             steps {
-		        docker.build("docker.ask4ua.com/whir-app:latest","-f docker/app/Dockerfile .")
+		        docker.build 'docker.ask4ua.com/whir-app:latest' '-f docker/app/Dockerfile .'
             }
         }
         stage('Test whir-app image') {
