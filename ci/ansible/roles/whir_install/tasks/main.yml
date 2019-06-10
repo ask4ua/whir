@@ -26,15 +26,27 @@
   args:
           chdir: /home/volk/git/whir
 
-- name: build docker whir-app image
-  command: docker build . -t docker.ask4ua.com/whir-app -f docker/images/app/Dockerfile
+- name: build docker whir-{{item}} image
+  command: docker build . -t docker.ask4ua.com/whir-{{item}} -f docker/images/{{item}}/Dockerfile
   args:
           chdir: /home/volk/git/whir
+  loop:
+  - app
+  - data
+  - decomposer
+  - parser
+  - db
 
-- name: build docker whir-db image
-  command: docker build . -t docker.ask4ua.com/whir-db -f docker/images/db/Dockerfile
+- name: pushing to docker.ask4ua.com whir-{{item}}
+  command: docker push docker.ask4ua.com/whir-{{item}}
   args:
           chdir: /home/volk/git/whir
+  loop:
+  - app
+  - data
+  - decomposer
+  - parser
+  - db
 
 - name: Swarm Init
   command: docker swarm init
