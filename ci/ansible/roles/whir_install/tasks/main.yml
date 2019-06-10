@@ -15,7 +15,7 @@
 
 - name: Pull if git clone falied
   remote_user: volk
-  command: git pull http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
+  command: git pull http://10.5.33.229:1180/root/whir.git
   args:
           chdir: /home/volk/git/whir
   when: git_clone is failed
