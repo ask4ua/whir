@@ -52,12 +52,6 @@ services:
                         - WHIR_DB_HOST=postgres
                 networks:
                         - whirnet
-secrets:
-        whir_db_password:
-                external: true
-        root_db_password:
-                external: true
-
         postgres:
                 image: docker.ask4ua.com/whir-db
                 ports:
@@ -78,7 +72,11 @@ secrets:
                         replicas: 1
                         restart_policy:
                                 condition: any
-
+secrets:
+        whir_db_password:
+                external: true
+        root_db_password:
+                external: true
 volumes:
         data_vol:
         postgres_vol:
@@ -89,3 +87,4 @@ volumes:
 #                        o: bind
 networks:
         whirnet:
+
