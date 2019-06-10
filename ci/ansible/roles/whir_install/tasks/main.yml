@@ -6,7 +6,7 @@
 
 - name: Cloning whir app project
   remote_user: volk
-  command: git clone https://gogs.ask4ua.com/root/whir.git /home/volk/git/whir
+  command: git clone http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
   retries: 3
   delay: 3
   until: git_clone.rc == 0
@@ -15,7 +15,7 @@
 
 - name: Pull if git clone falied
   remote_user: volk
-  command: git pull https://gogs.ask4ua.com/root/whir.git /home/volk/git/whir
+  command: git pull http://10.5.33.229:1180/root/whir.git /home/volk/git/whir
   args:
           chdir: /home/volk/git/whir
   when: git_clone is failed
