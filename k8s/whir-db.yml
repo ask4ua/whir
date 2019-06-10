@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: whir
+  name: whir
+spec:
+  containers:
+  - name: data
+    image: docker.ask4ua.com/whir-data
+    volumeMounts:
+    - name: data-vol
+      mountPath: /data
+  - name: parser
+    env:
+    - name: WHIR_DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
+    - name: WHIR_DB_NAME
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
+    - name: WHIR_DB_HOST
+      value: 127.0.0.1
+    volumeMounts:
+    - name: data-vol
+      mountPath: /data
+    image: docker.ask4ua.com/whir-parser
+  - name: decomposer
+    env:
+    - name: WHIR_DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
+    - name: WHIR_DB_NAME
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: WHIR_DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
+    - name: WHIR_DB_HOST
+      value: 127.0.0.1
+    volumeMounts:
+    - name: data-vol
+      mountPath: /data
+    image: docker.ask4ua.com/whir-decomposer
+  - name: postgres
+    env:
+    - name: POSTGRES_DB
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_user
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: whir-pass
+          key: whir_db_password
+    volumeMounts:
+    - name: postgres-vol
+      mountPath: /var/lib/postgresql/data
+    image: docker.ask4ua.com/whir-db
+    ports:
+    - containerPort: 5432
+      hostPort: 5432
+  volumes:
+  - name: secrets-vol
+    secret:
+      secretName: whir-pass
+  - name: postgres-vol
+  - name: data-vol
