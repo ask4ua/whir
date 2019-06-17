@@ -13,8 +13,8 @@
         regexp_hash: ' --discovery-token-ca-cert-hash\ ([^ ]+)'
 
     - debug:
-        var: regexp_socket
+        var: kudeadm_socket
     - debug:
-        var: regexp_token
+        var: kudeadm_token
     - debug:
-        var: regexp_hash
+        var: kudeadm_hash
