@@ -9,7 +9,7 @@
    action: reboot
    when: apt_lock is failed
 
-- name: Load repo updates
+ - name: Load repo updates
    remote_user: root
    action: apt update_cache=yes
 
