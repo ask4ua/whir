@@ -18,7 +18,7 @@
 
  - name: Add the Kubernetes signing key
    remote_user: root
-   command: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+   shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 
  - name: Add the Kubernetes Repo
    remote_user: root
