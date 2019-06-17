@@ -92,7 +92,7 @@
    when: '"master" in inventory_hostname'
 
  - name: give vhosts time to start
-   pause: minutes=3
+   pause: minutes=5
 
  - name: Kubectl Flannel
    remote_user: root
@@ -100,7 +100,7 @@
    when: '"master" in inventory_hostname'
 
  - name: give vhosts time to start
-   pause: minutes=3
+   pause: minutes=5
 
  - name: Join Cluster on worker nodes
    command: kubeadm join {{hostvars['k8s-master']['kudeadm_socket']}} --token {{hostvars['k8s-master']['kudeadm_token']}} --discovery-token-ca-cert-hash {{hostvars['k8s-master']['kudeadm_hash']}}
