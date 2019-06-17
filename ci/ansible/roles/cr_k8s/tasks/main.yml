@@ -4,18 +4,34 @@
     become_method: sudo
     command: virsh shutdown {{item}}
     loop:
-        - whir
+        - k8s-master
+        - k8s-worker-node1
+        - k8s-worker-node2
     ignore_errors: True
+
+
 
   - name: copy default image for {{item}}
     remote_user: root
     become: yes
     become_method: sudo
-    command: rsync -auv u1804_64_800G.qcow2 u1804_64_{{item}}.qcow2.wait
+    command: rsync -auv u1804_64_80G.qcow2 /var/lib/virsh/u1804_64_{{item}}.qcow2.wait
     args:
             chdir: /mnt/4T/virsh/images
     loop:
-        - whir
+        - k8s-master
+        - k8s-worker-node2
+
+  - name: copy default image for {{item}}
+    remote_user: root
+    become: yes
+    become_method: sudo
+    command: rsync -auv u1804_64_2T.qcow2 u1804_64_{{item}}.qcow2.wait
+    args:
+            chdir: /mnt/8T/virsh/images
+    loop:
+        - k8s-worker-node1
+
 
   - name: stop virsh {{item}}
     remote_user: root
@@ -23,8 +39,12 @@
     become_method: sudo
     command: virsh destroy {{item}}
     loop:
-        - whir
+        - k8s-master
+        - k8s-worker-node1
+        - k8s-worker-node2
     ignore_errors: True
+
+
 
   - name: remove old image for {{item}}
     remote_user: root
@@ -32,9 +52,22 @@
     become_method: sudo
     command: rm -rf u1804_64_{{item}}.qcow2
     args:
-            chdir: /mnt/4T/virsh/images
+            chdir: /var/lib/virsh/
     loop:
-        - whir
+        - k8s-master
+        - k8s-worker-node2
+
+  - name: remove old image for {{item}}
+    remote_user: root
+    become: yes
+    become_method: sudo
+    command: rm -rf u1804_64_{{item}}.qcow2
+    args:
+            chdir: /mnt/8T/virsh/images
+    loop:
+        - k8s-worker-node1
+
+
 
   - name: rename image for {{item}}
     remote_user: root
@@ -42,9 +75,21 @@
     become_method: sudo
     command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
     args:
-            chdir: /mnt/4T/virsh/images
+            chdir: /var/lib/virsh/images
     loop:
-        - whir
+        - k8s-master
+        - k8s-worker-node2
+
+  - name: rename image for {{item}}
+    remote_user: root
+    become: yes
+    become_method: sudo
+    command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
+    args:
+            chdir: /mnt/8T/virsh/images
+    loop:
+        - k8s-worker-node1
+
 
   - name: start {{item}}
     remote_user: root
@@ -53,5 +98,6 @@
     command: virsh start {{item}}
     loop:
         - whir
+
   - name: give vhosts time to start
     pause: minutes=1
