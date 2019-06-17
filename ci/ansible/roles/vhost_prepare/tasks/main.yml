@@ -1,0 +1,33 @@
+ - name: Check update is not locked
+   remote_user: root
+   action: apt update_cache=yes
+   register: apt_lock
+   ignore_errors: True
+
+ - name: Update is locked - reboot the host
+   remote_user: root
+   action: reboot
+   when: apt_lock is failed
+
+- name: Load repo updates
+   remote_user: root
+   action: apt update_cache=yes
+
+ - name: Install packages
+   remote_user: root
+   apt:
+      name: "{{packages}}"
+   vars:
+      packages:
+      - bridge-utils
+      - tcpdump
+
+ - name: disbale autorenaming
+   remote_user: root
+   copy: src=files/95_norenamehost.cfg dest=/etc/clod/cloud.cfg.d/ mode=0640
+
+ - name: Rename the host by ansible inventory
+   remote_user: root
+   shell: echo {{inventory_hostname}} > /etc/hostname
+   - debug:
+        var: inventory_hostname
