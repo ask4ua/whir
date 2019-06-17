@@ -1,0 +1,57 @@
+          - name: shut vhost "{{ item }}" in virsh
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: virsh shutdown {{item}}
+            loop:
+                - whir
+            ignore_errors: True
+
+          - name: copy default image for {{item}}
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: rsync -auv u1804_64_800G.qcow2 u1804_64_{{item}}.qcow2.wait
+            args:
+                    chdir: /mnt/4T/virsh/images
+            loop:
+                - whir
+                
+          - name: stop virsh {{item}}
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: virsh destroy {{item}}
+            loop:
+                - whir
+            ignore_errors: True
+
+          - name: remove old image for {{item}}
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: rm -rf u1804_64_{{item}}.qcow2
+            args:
+                    chdir: /mnt/4T/virsh/images
+            loop:
+                - whir
+
+          - name: rename image for {{item}}
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
+            args:
+                    chdir: /mnt/4T/virsh/images
+            loop:
+                - whir
+
+          - name: start {{item}}
+            remote_user: root
+            become: yes
+            become_method: sudo
+            command: virsh start {{item}}
+            loop:
+                - whir
+          - name: give vhosts time to start
+            pause: minutes=1

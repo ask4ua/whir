@@ -1,0 +1,27 @@
+ - name: Check Docker installed
+   command: docker --version
+   ignore_errors: True
+   register: docker_status
+
+ - name: Check update is not locked
+   remote_user: root
+   action: apt update_cache=yes
+   register: apt_lock
+   ignore_errors: True
+   when: docker_status is failed
+
+ - name: Update is locked - reboot the host
+   remote_user: root
+   action: reboot
+   when: apt_lock is failed
+
+ - name: Installs docker
+   remote_user: root
+   shell: curl -fsSL https://get.docker.com | sh -
+   when: docker_status is failed
+
+ - name: Installs docker user
+   remote_user: root
+   command: adduser volk docker
+   ignore_errors: True
+   when: docker_status is failed
