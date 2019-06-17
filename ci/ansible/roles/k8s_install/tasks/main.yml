@@ -30,7 +30,11 @@
 
  - name: Install Kubeadm
    remote_user: root
-   command: apt install kubeadm
+   apt:
+      name: "{{packages}}"
+   vars:
+      packages:
+      - kubeadm
 
 # - name: Init Kubeadm only on Master nodes
 #   remote_user: root
