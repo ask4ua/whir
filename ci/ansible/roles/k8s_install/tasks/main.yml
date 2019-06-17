@@ -92,7 +92,7 @@
    when: '"master" in inventory_hostname'
 
  - name: give vhosts time to start
-   pause: minutes=5
+   pause: minutes=10
 
  - name: Kubectl Flannel
    shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
