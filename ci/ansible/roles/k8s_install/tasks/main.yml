@@ -48,13 +48,13 @@
       - kubeadm
 
  - name: Install autocompletion on master Step 1
-   shell: echo 'source <(kubectl completion bash)' >>~/.bashrc
-   when: "master" in inventory_hostname
+   shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
+   when: '"master" in inventory_hostname'
 
  - name: Install autocompletion on master Step 2
    remote_user: root
    shell: kubectl completion bash >/etc/bash_completion.d/kubectl
-   when: "master" in inventory_hostname
+   when: '"master" in inventory_hostname'
 
 
 
