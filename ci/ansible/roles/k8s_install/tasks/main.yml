@@ -50,7 +50,7 @@
 
  - name: Init Kubeadm only on Master nodes
    remote_user: root
-   command: 'kubeadm init --pod-network-cidr=10.244.0.0/16'
+   shell: kubeadm init --pod-network-cidr=10.244.0.0/16
    when: "master" in inventory_hostname
    register: kubeadm_results
 
