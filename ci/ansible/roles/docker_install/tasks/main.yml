@@ -40,7 +40,7 @@
 
  - name: Install docker repo
    remote_user: root
-   command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+   command: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
    when: docker_status is failed
 
  - name: Load repo updates including updating docker repo
