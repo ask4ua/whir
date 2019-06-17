@@ -1,4 +1,4 @@
- - host: crs
+ - hosts: crs
    roles:
     - cr_k8s
  - hosts: k8s
