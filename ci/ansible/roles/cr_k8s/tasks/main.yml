@@ -52,7 +52,7 @@
     become_method: sudo
     command: rm -rf u1804_64_{{item}}.qcow2
     args:
-            chdir: /var/lib/virsh/
+            chdir: /var/lib/virsh
     loop:
         - k8s-master
         - k8s-worker-node2
@@ -67,6 +67,17 @@
     loop:
         - k8s-worker-node1
 
+  - name: remove old images/links for {{item}}
+    remote_user: root
+    become: yes
+    become_method: sudo
+    command: rm u1804_64_{{item}}.qcow2
+    args:
+            chdir: /var/lib/virsh
+    loop:
+        - k8s-master
+        - k8s-worker-node1
+        - k8s-worker-node2
 
 
   - name: rename image for {{item}}
@@ -75,7 +86,7 @@
     become_method: sudo
     command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
     args:
-            chdir: /var/lib/virsh/images
+            chdir: /var/lib/virsh
     loop:
         - k8s-master
         - k8s-worker-node2
@@ -90,6 +101,15 @@
     loop:
         - k8s-worker-node1
 
+  - name: link image for {{item}}
+    remote_user: root
+    become: yes
+    become_method: sudo
+    command: ln -s /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2
+    args:
+            chdir: /var/lib/virsh
+    loop:
+        - k8s-worker-node1
 
   - name: start {{item}}
     remote_user: root
