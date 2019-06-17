@@ -26,7 +26,7 @@
     remote_user: root
     become: yes
     become_method: sudo
-    command: rsync -auv u1804_64_2T.raw u1804_64_{{item}}.raw.wait
+    command: rsync -auv u1804_64_2T.qcow2 u1804_64_{{item}}.qcow2.wait
     args:
             chdir: /mnt/8T/virsh/images
     loop:
@@ -84,7 +84,7 @@
     remote_user: root
     become: yes
     become_method: sudo
-    command: mv u1804_64_{{item}}.raw.wait u1804_64_{{item}}.raw
+    command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
     args:
             chdir: /mnt/8T/virsh/images
     loop:
