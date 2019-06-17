@@ -12,7 +12,8 @@
         regexp_token: '--token \"([^"]+)'
         regexp_hash: ' --discovery-token-ca-cert-hash \"([^"]+)'
     - debug:
-        var:
-        - regexp_socket
-        - regexp_token
-        - regexp_hash
+        var: regexp_socket
+    - debug:
+        var: regexp_token
+    - debug:
+        var: regexp_hash
