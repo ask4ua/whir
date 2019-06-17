@@ -1,11 +1,18 @@
 - hosts: localhost
   gather_facts: no
   tasks:
-    - shell: echo ''
+    - shell: echo 'kubeadm join 10.5.33.10:6443 --token 3k5f47.j3rdpsk484fce4x5 --discovery-token-ca-cert-hash sha256:0f035851d67996bb27963759a0448a40b20948def5b241377e1e93d416674a96'
       register: results
     - set_fact:
-        myvalue: "{{ results.stdout | regex_search(regexp,'\\1') }}"
+        kudeadm_socket: "{{ results.stdout | regex_search(regexp_socket,'\\1') }}"
+        kudeadm_token: "{{ results.stdout | regex_search(regexp_token,'\\1') }}"
+        kudeadm_hash: "{{ results.stdout | regex_search(regexp_hash,'\\1') }}"
       vars:
-        regexp: 'value=\"([^"]+)'
+        regexp_socket: 'join \"([^"]+)'
+        regexp_token: '--token \"([^"]+)'
+        regexp_hash: ' --discovery-token-ca-cert-hash \"([^"]+)'
     - debug:
-        var: myvalue
+        var:
+        - regexp_socket
+        - regexp_token
+        - regexp_hash
