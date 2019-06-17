@@ -91,8 +91,8 @@
    shell: kubectl completion bash >/etc/bash_completion.d/kubectl
    when: '"master" in inventory_hostname'
 
- - name: give vhosts time to start
-   pause: minutes=3
+# - name: give vhosts time to start
+#   pause: minutes=1
 
  - name: Kubectl Flannel
    remote_user: root
