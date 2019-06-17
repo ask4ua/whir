@@ -1,16 +1,25 @@
+ - name: Check Kuber installed
+   command: kubeadm --version
+   ignore_errors: True
+   register: kuber_install_status
+
  - name: Swapoff
    remote_user: root
    command: swapoff -a
+   when: kuber_install_status is failed
 
  - name: Disable swap in fstab
    remote_user: root
    command: sed -i '/swap/d' /etc/fstab
    ignore_errors: True
+   when: kuber_install_status is failed
+
 
  - name: Remove swap image
    remote_user: root
    command: rm /swap.img
    ignore_errors: True
+   when: kuber_install_status is failed
 
  - name: Enable Docker
    command: systemctl enable docker
@@ -19,10 +28,12 @@
  - name: Add the Kubernetes signing key
    remote_user: root
    shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+   when: kuber_install_status is failed
 
  - name: Add the Kubernetes Repo
    remote_user: root
    command: apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+   when: kuber_install_status is failed
 
  - name: Update repos
    remote_user: root
@@ -36,7 +47,19 @@
       packages:
       - kubeadm
 
-# - name: Init Kubeadm only on Master nodes
+ - name: Install autocompletion on master Step 1
+   shell: echo 'source <(kubectl completion bash)' >>~/.bashrc
+   when: "master" in inventory_hostname
+
+ - name: Install autocompletion on master Step 2
+   remote_user: root
+   shell: kubectl completion bash >/etc/bash_completion.d/kubectl
+   when: "master" in inventory_hostname
+
+
+
+
+ # - name: Init Kubeadm only on Master nodes
 #   remote_user: root
 #   command: apt install kubeadm
 #   when: "master" in inventory_hostname
