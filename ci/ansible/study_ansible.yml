@@ -8,9 +8,10 @@
         kudeadm_token: "{{ results.stdout | regex_search(regexp_token,'\\1') }}"
         kudeadm_hash: "{{ results.stdout | regex_search(regexp_hash,'\\1') }}"
       vars:
-        regexp_socket: 'join \"([^"]+)'
-        regexp_token: '--token \"([^"]+)'
-        regexp_hash: ' --discovery-token-ca-cert-hash \"([^"]+)'
+        regexp_socket: 'join\ ([^ ]+)'
+        regexp_token: '--token\ ([^ ]+)'
+        regexp_hash: ' --discovery-token-ca-cert-hash\ ([^ ]+)'
+
     - debug:
         var: regexp_socket
     - debug:
