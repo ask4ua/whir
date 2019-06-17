@@ -90,11 +90,19 @@
    shell: kubectl completion bash >/etc/bash_completion.d/kubectl
    when: '"master" in inventory_hostname'
 
+ - name: give vhosts time to start
+   pause: minutes=3
+
  - name: Kubectl Flannel
    remote_user: root
-   command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+   shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
    when: '"master" in inventory_hostname'
+
+ - name: give vhosts time to start
+   pause: minutes=3
 
  - name: Join Cluster on worker nodes
    command: kubeadm join {{kudeadm_socket}} --token {{kudeadm_token}} --discovery-token-ca-cert-hash {{kudeadm_hash}}
    when: '"worker" in inventory_hostname'
+
+
