@@ -30,7 +30,8 @@
    remote_user: root
    shell: echo {{inventory_hostname}} > /etc/hostname
 
- - debug:
+ - name: Debug Hostname
+   debug:
    var: inventory_hostname
 
  - name: Reboot the host
