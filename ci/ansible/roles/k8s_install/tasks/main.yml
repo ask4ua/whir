@@ -66,6 +66,7 @@
       regexp_socket: 'join\ ([^ ]+)'
       regexp_token: '--token\ ([^ ]+)'
       regexp_hash: ' --discovery-token-ca-cert-hash\ ([^ ]+)'
+   when: '"master" in inventory_hostname'
 
  - name: Post Install Kubeadm Cluster Part 1/3
    shell: mkdir -p /home/volk/.kube
@@ -102,7 +103,7 @@
    pause: minutes=3
 
  - name: Join Cluster on worker nodes
-   command: kubeadm join {{kudeadm_socket}} --token {{kudeadm_token}} --discovery-token-ca-cert-hash {{kudeadm_hash}}
+   command: kubeadm join {{hostvars['k8s-master']['kudeadm_socket']}} --token {{hostvars['k8s-master']['kudeadm_token']}} --discovery-token-ca-cert-hash {{hostvars['k8s-master']['kudeadm_hash']}}
    when: '"worker" in inventory_hostname'
 
 
