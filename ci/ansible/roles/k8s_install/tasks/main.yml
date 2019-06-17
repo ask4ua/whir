@@ -50,7 +50,7 @@
 
  - name: Init Kubeadm only on Master nodes
    remote_user: root
-   shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+   shell: 'kubeadm init --pod-network-cidr=10.244.0.0/16'
    when: "master" in inventory_hostname
    register: kubeadm_results
 
@@ -77,7 +77,6 @@
    remote_user: root
    shell: chown volk:volk /home/volk/.kube/config
    when: '"master" in inventory_hostname'
-
 
  - name: Install autocompletion on master Step 1/2
    shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
