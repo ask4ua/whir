@@ -1,12 +1,11 @@
-- hosts: CR
-  remote_user: root
-  become: yes
-  become_method: sudo
+- hosts: localhost
+  gather_facts: no
   tasks:
-          - name: touch home file "{{ item }}"
-            command: touch {{item}}
-            loop:
-                - studyfile1
-                - studyfile2
-            ignore_errors: True
-
+    - shell: echo ''
+      register: results
+    - set_fact:
+        myvalue: "{{ results.stdout | regex_search(regexp,'\\1') }}"
+      vars:
+        regexp: 'value=\"([^"]+)'
+    - debug:
+        var: myvalue
