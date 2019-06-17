@@ -1,3 +1,17 @@
+ - name: Swapoff
+   remote_user: root
+   command: swapoff -a
+
+ - name: Disable swap in fstab
+   remote_user: root
+   command: sed -i '/swap/d' /etc/fstab
+   ignore_errors: True
+
+ - name: Remove swap image
+   remote_user: root
+   command: rm /swap.img
+   ignore_errors: True
+
  - name: Enable Docker
    command: systemctl enable docker
    remote_user: root
@@ -18,16 +32,15 @@
    remote_user: root
    command: apt install kubeadm
 
- - name: Swapoff
-   remote_user: root
-   command: swapoff -a
-
- - name: Disable swap in fstab
-   remote_user: root
-   command: sed -i '/swap/d' /etc/fstab
-
- - name: Remove swap image
-   remote_user: root
-   command: rm /swap.img
-   ignore_errors: True
+# - name: Init Kubeadm only on Master nodes
+#   remote_user: root
+#   command: apt install kubeadm
+#   when: "master" in inventory_hostname
+#    register: results
+#    - set_fact:
+#        kuberinitstring: "{{ results.stdout | regex_search(regexp,'\\1') }}"
+#      vars:
+#        regexp: 'kubeadm join \"([^"]+)'
+#    - debug:
+#        var: kuberinitstring
 

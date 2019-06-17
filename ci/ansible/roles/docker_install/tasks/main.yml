@@ -17,12 +17,20 @@
 
  - name: Remove older dockers
    remote_user: root
+   ignore_errors: True
    command: apt-get remove docker docker-engine docker.io
    when: docker_status is failed
 
- - name: Apt update
+ - name: Apt install required packages
    remote_user: root
-   command: apt-get install apt-transport-https ca-certificates curl software-properties-common
+   apt:
+      name: "{{packages}}"
+   vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
    when: docker_status is failed
 
  - name: Add docker official keys
@@ -44,7 +52,6 @@
    remote_user: root
    command: apt-get install docker-ce
    when: docker_status is failed
-
 
  - name: Installs docker user
    remote_user: root
