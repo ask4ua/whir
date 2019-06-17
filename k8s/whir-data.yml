@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    name: whir
-  name: whir
+    name: whir-data
+  name: whir-data
 spec:
   containers:
   - name: data

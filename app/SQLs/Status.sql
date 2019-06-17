@@ -9,6 +9,6 @@ select count(*) "Message Should be next" from messages left join words on words.
 
 select count(*) "Messages In Progress" from messages where messages.inprogress_flag=TRUE;
 
---select count(*) "Total Words" from words;
---select sum(wordsinword.count) "Total wordsinword" from wordsinword;
+select count(*) "Total Words" from words;
+select sum(wordsinword.count) "Total wordsinword" from wordsinword;
 	

@@ -3,6 +3,9 @@ import os
 import yaml
 import sys
 
+#from subprocess import Popen, PIPE
+#from os import path
+
 import whir.counter as whir
 from whir.db import db
 from whir.db import author
@@ -240,9 +243,22 @@ if __name__=='__main__':
 
     Configs.load(logger)
 
+    # repo='http://10.5.33.229:1180/root/whir-testdata.git'
+    # branch=''
+    # if branch != '':
+    #     branch=' --branch ' + str(branch)
+    #
+    # git_command = ['/usr/bin/git', 'clone ' + repo +  branch + ' ./']
+    # repository = path.dirname('/data')
+    # git_query = Popen(git_command, cwd=repository, stdout=PIPE, stderr=PIPE)
+    # (git_status, error) = git_query.communicate()
+    #
+    # if git_query.poll() != 0:
+    #     logger.warning('Repo ' + repo + ' wasn`t cloned due to ' + str(error))
+    #     logger.info('Trying to pull')
+
 
     while True:
-
         files_index=[]
 
         try:
@@ -262,11 +278,12 @@ if __name__=='__main__':
     logger.info("Parsing Input")
     parse_files_index(files_index,logger)
 
+    logger.info("Syncing to DB")
+    sync_to_db()
+
     logger.info("Updating CSV")
     writecsv(files_index, '/data/index.csv', logger)
 
-    logger.info("Syncing to DB")
-    sync_to_db()
 
     #logger.info("Removing all decomposed entities for the next run")
     #whir.clear_all()
