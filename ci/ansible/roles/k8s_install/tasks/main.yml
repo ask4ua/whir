@@ -1,27 +1,33 @@
- - name: Check Docker installed
-   command: docker --version
-   ignore_errors: True
-   register: docker_status
+ - name: Enable Docker
+   command: systemctl enable docker
+   remote_user: root
 
- - name: Check update is not locked
+ - name: Add the Kubernetes signing key
+   remote_user: root
+   command: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+
+ - name: Add the Kubernetes Repo
+   remote_user: root
+   command: apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+ - name: Update repos
    remote_user: root
    action: apt update_cache=yes
-   register: apt_lock
+
+ - name: Install Kubeadm
+   remote_user: root
+   command: apt install kubeadm
+
+ - name: Swapoff
+   remote_user: root
+   command: swapoff -a
+
+ - name: Disable swap in fstab
+   remote_user: root
+   command: sed -i '/swap/d' /etc/fstab
+
+ - name: Remove swap image
+   remote_user: root
+   command: rm /swap.img
    ignore_errors: True
-   when: docker_status is failed
 
- - name: Update is locked - reboot the host
-   remote_user: root
-   action: reboot
-   when: apt_lock is failed
-
- - name: Installs docker
-   remote_user: root
-   shell: curl -fsSL https://get.docker.com | sh -
-   when: docker_status is failed
-
- - name: Installs docker user
-   remote_user: root
-   command: adduser volk docker
-   ignore_errors: True
-   when: docker_status is failed

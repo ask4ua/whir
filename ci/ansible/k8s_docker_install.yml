@@ -1,0 +1,6 @@
+ - hosts: k8s
+   roles:
+    - docker_install
+    - k8s_install
+
+

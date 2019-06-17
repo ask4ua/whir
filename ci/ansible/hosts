@@ -6,8 +6,19 @@ elk ansible_ssh_host=10.5.33.42 ansible_ssh_user=root
 elkstudy ansible_ssh_host=10.5.33.43 ansible_ssh_user=root
 pgstudy ansible_ssh_host=10.5.33.44 ansible_ssh_user=root
 
+k8s_master ansible_ssh_host=10.5.33.10 ansible_ssh_user=root
+k8s-worker-node1 ansible_ssh_host=10.5.33.11 ansible_ssh_user=root
+k8s-worker-node2 ansible_ssh_host=10.5.33.12 ansible_ssh_user=root
+
 [whirs]
 whir
 
 [elks]
 elk
+
+[k8s]
+k8s_master
+k8s-worker-node1
+k8s-worker-node2
+
+
