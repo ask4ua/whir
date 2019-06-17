@@ -14,12 +14,15 @@
    ignore_errors: True
    when: kuber_install_status is failed
 
-
  - name: Remove swap image
    remote_user: root
    command: rm /swap.img
    ignore_errors: True
    when: kuber_install_status is failed
+
+ - name: disbale autorenaming
+   remote_user: root
+   copy: src=files/etc-hosts dest=/etc/hosts
 
  - name: Enable Docker
    command: systemctl enable docker
