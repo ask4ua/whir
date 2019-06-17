@@ -1,4 +1,5 @@
 vatra ansible_ssh_host=10.5.33.229 ansible_ssh_user=volk
+
 nani ansible_ssh_host=10.5.33.230 ansible_ssh_user=volk
 cheval ansible_ssh_host=10.5.33.40 ansible_ssh_user=root
 whir ansible_ssh_host=10.5.33.41 ansible_ssh_user=root
@@ -20,5 +21,8 @@ elk
 k8s_master
 k8s-worker-node1
 k8s-worker-node2
+
+[crs]
+vatra
 
 
