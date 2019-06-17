@@ -29,8 +29,8 @@
  - name: Rename the host by ansible inventory
    remote_user: root
    shell: echo {{inventory_hostname}} > /etc/hostname
-   - debug:
-        var: inventory_hostname
+    - debug:
+      var: inventory_hostname
 
  - name: Reboot the host
    remote_user: root
