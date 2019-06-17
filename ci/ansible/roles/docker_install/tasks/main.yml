@@ -45,12 +45,17 @@
 
  - name: Load repo updates including updating docker repo
    remote_user: root
-   command: apt-get update
+   action: apt update_cache=yes
+   register: apt_lock
+   ignore_errors: True
    when: docker_status is failed
 
  - name: Install docker-ce
-   remote_user: root
-   command: apt-get install docker-ce
+   apt:
+      name: "{{packages}}"
+   vars:
+      packages:
+      - docker-ce
    when: docker_status is failed
 
  - name: Installs docker user
