@@ -5,5 +5,7 @@ metadata:
 spec:
   selector:
     tier: whir-db
+  type: NodePort
   ports:
     - port: 5432
+    - nodePort: 35432
