@@ -108,10 +108,8 @@
 
  - name: Debug - get connection strings
    debug:
-     vars:
-       - kudeadm_socket
-       - kudeadm_token
-       - kudeadm_hash
+     msg:
+       - "Kubeadm socket: {{kudeadm_socket}} token: {{kudeadm_token}} and token hash: {{kudeadm_hash}}"
 
  - name: give vhosts time to start
    pause: minutes=5
