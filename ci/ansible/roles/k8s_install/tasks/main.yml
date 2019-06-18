@@ -71,7 +71,7 @@
  - name: Debug - get connection strings
    debug:
      msg:
-       - "Kubeadm socket: {{kudeadm_socket}} token: {{kudeadm_token}} and token hash: {{kudeadm_hash}}"
+       - "kubeadm join {{kudeadm_socket}} --token {{kudeadm_token}} --discovery-token-ca-cert-hash {{kudeadm_hash}}"
    when: '"master" in inventory_hostname'
 
  - name: Post Install Kubeadm Cluster Part 1/3
