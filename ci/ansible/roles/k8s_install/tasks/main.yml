@@ -103,6 +103,7 @@
    debug:
      msg:
        - "Kubeadm socket: {{kudeadm_socket}} token: {{kudeadm_token}} and token hash: {{kudeadm_hash}}"
+   when: '"master" in inventory_hostname'
 
  - name: give vhosts time to start
    pause: minutes=5
