@@ -63,7 +63,7 @@
       kudeadm_token: "{{ kubeadm_results.stdout | regex_search(regexp_token,'\\1') }}"
       kudeadm_hash: "{{ kubeadm_results.stdout | regex_search(regexp_hash,'\\1') }}"
    vars:
-      regexp_socket: 'join\ ([^ ]+)'
+      regexp_socket: 'kubeadm join\ ([^ ]+)'
       regexp_token: '--token\ ([^ ]+)'
       regexp_hash: ' --discovery-token-ca-cert-hash\ ([^ ]+)'
    when: '"master" in inventory_hostname'
