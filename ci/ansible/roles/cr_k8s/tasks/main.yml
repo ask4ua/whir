@@ -11,7 +11,7 @@
 
 
 
-  - name: copy default image for {{item}}
+  - name: copy default image for {{item}} from mnt-4T to SSD
     remote_user: root
     become: yes
     become_method: sudo
@@ -23,13 +23,13 @@
 #        - k8s-worker-node1
         - k8s-worker-node2
 
-  - name: copy default image for {{item}}
+  - name: copy default image for {{item}} from mnt-4T to mnt-8T
     remote_user: root
     become: yes
     become_method: sudo
-    command: rsync -auv u1804_64_2T.qcow2 u1804_64_{{item}}.qcow2.wait
+    command: rsync -auv u1804_64_2T.qcow2 /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2.wait
     args:
-            chdir: /mnt/8T/virsh/images
+            chdir: /mnt/4T/virsh/images
     loop:
         - k8s-worker-node1
 
