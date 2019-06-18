@@ -52,9 +52,9 @@
    ignore_errors: True
    when: docker_status is failed
 
- - name: Set local DNS
-   remote_user: root
-   shell: echo 'DOCKER_OPTS=DOCKER_OPTS + " --dns 10.5.33.254"' >> /etc/default/docker
-   ignore_errors: True
-   when: docker_status is failed
+# - name: Set local DNS
+#   remote_user: root
+#   shell: echo 'DOCKER_OPTS=DOCKER_OPTS + " --dns 10.5.33.254"' >> /etc/default/docker
+#   ignore_errors: True
+#   when: docker_status is failed
 

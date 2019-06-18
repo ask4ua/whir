@@ -95,6 +95,7 @@
    pause: minutes=10
 
  - name: Kubectl Flannel
+   remote_user: volk
    shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
    when: '"master" in inventory_hostname'
 
