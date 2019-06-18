@@ -492,7 +492,7 @@ class db_parser:
         return new_word_ids
 
     @staticmethod
-    def write_words_to_db(new_word_ids, sql_session, date, window=1024):
+    def write_words_to_db(new_word_ids, sql_session, date, window=128):
         logger.info("Starting writing words to DB")
         pointer = 0
 
