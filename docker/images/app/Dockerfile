@@ -7,3 +7,4 @@ RUN pip3 install mysql-connector pyyaml
 RUN pip3 install docker-py 
 RUN pip3 install psycopg2
 COPY ./app/ /app/
+CMD /app/cycle.sh

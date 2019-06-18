@@ -11,6 +11,8 @@ spec:
       labels:
         tier: whir-db
     spec:
+      nodeSelector:
+        storagesize: 1Tplus
       containers:
       - name: postgres
         env:

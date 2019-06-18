@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: whir-app
+spec:
+  replicas: 1
+  selector:
+    tier: whir-app
+  template:
+    metadata:
+      labels:
+        tier: whir-app
+    spec:
+      nodeSelector:
+        storagetype: ssd
+      containers:
+#      - name: data
+#        image: docker.ask4ua.com/whir-data
+#        volumeMounts:
+#        - name: data-vol
+#          mountPath: /data
+#      - name: parser
+#        env:
+#        - name: WHIR_DB_USER
+#          valueFrom:
+#            secretKeyRef:
+#              name: whir-pass
+#              key: whir_db_user
+#        - name: WHIR_DB_NAME
+#          valueFrom:
+#            secretKeyRef:
+#              name: whir-pass
+#              key: whir_db
+#        - name: WHIR_DB_PASSWORD
+#          valueFrom:
+#            secretKeyRef:
+#              name: whir-pass
+#              key: whir_db_password
+#        - name: WHIR_DB_HOST
+#          value: whir-db
+#        volumeMounts:
+#        - name: data-vol
+#          mountPath: /data
+#        image: docker.ask4ua.com/whir-parser
+      - name: decomposer
+        env:
+        - name: WHIR_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: whir-pass
+              key: whir_db_user
+        - name: WHIR_DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: whir-pass
+              key: whir_db
+        - name: WHIR_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: whir-pass
+              key: whir_db_password
+        - name: WHIR_DB_HOST
+          value: whir-db
+        volumeMounts:
+        - name: data-vol
+          mountPath: /data
+        image: docker.ask4ua.com/whir-app
+      volumes:
+      - name: secrets-vol
+        secret:
+          secretName: whir-pass
+      - name: data-vol
