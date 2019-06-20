@@ -20,18 +20,18 @@
             chdir: /mnt/4T/virsh/images
     loop:
         - k8s-master
-#        - k8s-worker-node1
+        - k8s-worker-node1
         - k8s-worker-node2
 
-  - name: copy default image for {{item}} from mnt-4T to mnt-8T
-    remote_user: root
-    become: yes
-    become_method: sudo
-    command: rsync -auv u1804_64_2T.qcow2 /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2.wait
-    args:
-            chdir: /mnt/4T/virsh/images
-    loop:
-        - k8s-worker-node1
+#  - name: copy default image for {{item}} from mnt-4T to mnt-8T
+#    remote_user: root
+#    become: yes
+#    become_method: sudo
+#    command: rsync -auv u1804_64_2T.qcow2 /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2.wait
+#    args:
+#            chdir: /mnt/4T/virsh/images
+#    loop:
+#        - k8s-worker-node1
 
 
   - name: stop virsh {{item}}
@@ -58,15 +58,15 @@
         - k8s-worker-node1
     ignore_errors: True
 
-  - name: remove old image for {{item}}
-    remote_user: root
-    become: yes
-    become_method: sudo
-    command: rm -rf u1804_64_{{item}}.qcow2
-    args:
-            chdir: /mnt/8T/virsh/images
-    loop:
-        - k8s-worker-node1
+#  - name: remove old image for {{item}}
+#    remote_user: root
+#    become: yes
+#    become_method: sudo
+#    command: rm -rf u1804_64_{{item}}.qcow2
+#    args:
+#            chdir: /mnt/8T/virsh/images
+#    loop:
+#        - k8s-worker-node1
 
 #  - name: remove old images/links for {{item}}
 #    remote_user: root
@@ -90,17 +90,17 @@
     loop:
         - k8s-master
         - k8s-worker-node2
-#        - k8s-worker-node1
-
-  - name: rename image for {{item}}
-    remote_user: root
-    become: yes
-    become_method: sudo
-    command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
-    args:
-            chdir: /mnt/8T/virsh/images
-    loop:
         - k8s-worker-node1
+
+#  - name: rename image for {{item}}
+#    remote_user: root
+#    become: yes
+#    become_method: sudo
+#    command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
+#    args:
+#            chdir: /mnt/8T/virsh/images
+#    loop:
+#        - k8s-worker-node1
 
   - name: link image for {{item}}
     remote_user: root
