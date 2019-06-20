@@ -102,15 +102,15 @@
 #    loop:
 #        - k8s-worker-node1
 
-  - name: link image for {{item}}
-    remote_user: root
-    become: yes
-    become_method: sudo
-    command: ln -s /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2
-    args:
-            chdir: /var/lib/virsh
-    loop:
-        - k8s-worker-node1
+#  - name: link image for {{item}}
+#    remote_user: root
+#    become: yes
+#    become_method: sudo
+#    command: ln -s /mnt/8T/virsh/images/u1804_64_{{item}}.qcow2
+#    args:
+#            chdir: /var/lib/virsh
+#    loop:
+#        - k8s-worker-node1
 
   - name: start {{item}}
     remote_user: root
