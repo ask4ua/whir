@@ -46,7 +46,7 @@
       - docker-ce
    when: docker_status is failed
 
- - name: Installs docker user
+ - name: Add docker user to docker group
    remote_user: root
    command: adduser volk docker
    ignore_errors: True

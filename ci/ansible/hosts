@@ -20,7 +20,7 @@ elk
 [k8s]
 k8s-master
 k8s-worker-node1
-k8s-worker-node2
+
 
 [crs]
 vatra

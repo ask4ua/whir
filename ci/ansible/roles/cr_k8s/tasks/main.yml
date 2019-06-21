@@ -3,11 +3,11 @@
     become: yes
     become_method: sudo
     command: virsh shutdown {{item}}
-    loop:
-        - k8s-master
-        - k8s-worker-node1
-        - k8s-worker-node2
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
     ignore_errors: True
 
 
@@ -19,11 +19,11 @@
     command: rsync -auv u1804_64_80G.qcow2 /var/lib/virsh/u1804_64_{{item}}.qcow2.wait
     args:
             chdir: /mnt/4T/virsh/images
-    loop:
-        - k8s-master
-        - k8s-worker-node1
-        - k8s-worker-node2
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
 
 #  - name: copy default image for {{item}} from mnt-4T to mnt-8T
 #    remote_user: root
@@ -41,11 +41,11 @@
     become: yes
     become_method: sudo
     command: virsh destroy {{item}}
-    loop:
-        - k8s-master
-        - k8s-worker-node1
-        - k8s-worker-node2
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
     ignore_errors: True
 
   - name: remove old image for {{item}}
@@ -55,11 +55,11 @@
     command: rm -rf u1804_64_{{item}}.qcow2
     args:
             chdir: /var/lib/virsh
-    loop:
-        - k8s-master
-        - k8s-worker-node2
-        - k8s-worker-node1
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
     ignore_errors: True
 
 #  - name: remove old image for {{item}}
@@ -91,11 +91,11 @@
     command: mv u1804_64_{{item}}.qcow2.wait u1804_64_{{item}}.qcow2
     args:
             chdir: /var/lib/virsh
-    loop:
-        - k8s-master
-        - k8s-worker-node2
-        - k8s-worker-node1
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
 
 #  - name: rename image for {{item}}
 #    remote_user: root
@@ -122,11 +122,11 @@
     become: yes
     become_method: sudo
     command: virsh start {{item}}
-    loop:
-        - k8s-master
-        - k8s-worker-node2
-        - k8s-worker-node1
-        - k8s-worker-node3
+    loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
+#        - k8s-master
+#        - k8s-worker-node1
+#        - k8s-worker-node2
+#        - k8s-worker-node3
 
   - name: give vhosts time to start
     pause: minutes=1
