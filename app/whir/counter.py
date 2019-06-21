@@ -12,8 +12,8 @@ class text_unification:
     # [0] separator is used to add to the end of line for sure
 
     block_separators = ['\n','\t']
-    sentense_separators = ['.','!','?','...']
-    phrase_separators = [',',':', ';','- ','\"','\'','(',')','{','}','[',']']
+    sentense_separators = ['.','!','?','...',':',';','(',')','{','}','[',']','\"','\'']
+    phrase_separators = [',','- ']
     words_in_phrase_separators = [' ']
 
     separators=[block_separators,sentense_separators,phrase_separators,words_in_phrase_separators]
