@@ -74,6 +74,10 @@
        - "kubeadm join {{kudeadm_socket | to_yaml }}  --token {{kudeadm_token | to_yaml }} --discovery-token-ca-cert-hash {{kudeadm_hash | to_yaml}}"
    when: '"master" in inventory_hostname'
 
+ - name: Debug - get connection strings
+   shell: echo "#!/bin/bash\nsudo kubeadm join {{kudeadm_socket | to_yaml }}  --token {{kudeadm_token | to_yaml }} --discovery-token-ca-cert-hash {{kudeadm_hash | to_yaml}}" > join.sh
+   when: '"master" in inventory_hostname'
+
  - name: Post Install Kubeadm Cluster Part 1/3
    shell: mkdir -p /home/volk/.kube
    when: '"master" in inventory_hostname'

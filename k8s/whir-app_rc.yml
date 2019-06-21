@@ -11,8 +11,8 @@ spec:
       labels:
         tier: whir-app
     spec:
-      nodeSelector:
-        storagetype: ssd
+#      nodeSelector:
+#        storagetype: ssd
       containers:
 #      - name: data
 #        image: docker.ask4ua.com/whir-data
