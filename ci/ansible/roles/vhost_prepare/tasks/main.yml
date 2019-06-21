@@ -24,7 +24,7 @@
 
  - name: disbale autorenaming
    remote_user: root
-   copy: src=files/95_norenamehost.cfg dest=/etc/clod/cloud.cfg.d/ mode=0640
+   copy: src=files/95_norenamehost.cfg dest=/etc/cloud/cloud.cfg.d/ mode=0640
 
  - name: Rename the host by ansible inventory
    remote_user: root
