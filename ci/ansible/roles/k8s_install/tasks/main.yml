@@ -114,7 +114,7 @@
    pause: minutes=3
 
  - name: Join Cluster on worker nodes
-   command: kubeadm join "{{hostvars['k8s-master']['kudeadm_socket']| to_yaml}}" --token "{{hostvars['k8s-master']['kudeadm_token']| to_yaml}}" --discovery-token-ca-cert-hash "{{hostvars['k8s-master']['kudeadm_hash']| to_yaml}}"
+   command: kubeadm join {{hostvars['k8s-master']['kudeadm_socket'][0]| to_yaml}} --token {{hostvars['k8s-master']['kudeadm_token'][0]| to_yaml}} --discovery-token-ca-cert-hash {{hostvars['k8s-master']['kudeadm_hash'][0]| to_yaml}}
    when: '"worker" in inventory_hostname'
 
 
