@@ -1,6 +1,6 @@
 vatra ansible_ssh_host=10.5.33.229 ansible_ssh_user=volk
-
 nani ansible_ssh_host=10.5.33.230 ansible_ssh_user=volk
+
 cheval ansible_ssh_host=10.5.33.40 ansible_ssh_user=root
 whir ansible_ssh_host=10.5.33.41 ansible_ssh_user=root
 elk ansible_ssh_host=10.5.33.42 ansible_ssh_user=root

@@ -10,9 +10,9 @@
     remote_user: root
     become: yes
     become_method: sudo
-    command: rsync -auv u1804_64_80G.qcow2 /var/lib/virsh/u1804_64_{{item}}.qcow2.wait
+    command: rsync -L u1804_64_80G.qcow2 u1804_64_{{item}}.qcow2.wait
     args:
-            chdir: /mnt/4T/virsh/images
+            chdir: /var/lib/virsh
     loop: "{{ hostvars['localhost']['groups']['k8s'] }}"
 
   - name: stop virsh {{item}}

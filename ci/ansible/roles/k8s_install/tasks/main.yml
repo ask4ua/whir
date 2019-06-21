@@ -101,19 +101,19 @@
    copy: src=files/flannel.sh dest=/home/volk/
    when: '"master" in inventory_hostname'
 
- - name: give vhosts time to start
-   pause: minutes=3
-
- - name: Kubectl Flannel
-   remote_user: root
-   shell: bash /home/volk/flannel.sh
-   when: '"master" in inventory_hostname'
-
- - name: give vhosts time to start
-   pause: minutes=3
-
- - name: Join Cluster on worker nodes
-   command: kubeadm join "{{ hostvars['k8s-master']['kudeadm_socket']| to_yaml }}" --token "{{ hostvars['k8s-master']['kudeadm_token'] | to_yaml}}" --discovery-token-ca-cert-hash "{{hostvars['k8s-master']['kudeadm_hash']| to_yaml}}"
-   when: '"worker" in inventory_hostname'
+# - name: give vhosts time to start
+#   pause: minutes=3
+#
+# - name: Kubectl Flannel
+#   remote_user: root
+#   shell: bash /home/volk/flannel.sh
+#   when: '"master" in inventory_hostname'
+#
+# - name: give vhosts time to start
+#   pause: minutes=3
+#
+# - name: Join Cluster on worker nodes
+#   command: kubeadm join "{{ hostvars['k8s-master']['kudeadm_socket']| to_yaml }}" --token "{{ hostvars['k8s-master']['kudeadm_token'] | to_yaml}}" --discovery-token-ca-cert-hash "{{hostvars['k8s-master']['kudeadm_hash']| to_yaml}}"
+#   when: '"worker" in inventory_hostname'
 
 
