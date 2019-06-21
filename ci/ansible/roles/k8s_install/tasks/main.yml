@@ -100,7 +100,7 @@
  - name: Copy kube-flannel.sh
    remote_user: root
    copy: src=files/flannel.sh dest=/home/volk/
-   when: '"worker" in inventory_hostname'
+   when: '"master" in inventory_hostname'
 
  - name: give vhosts time to start
    pause: minutes=3
