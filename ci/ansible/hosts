@@ -24,11 +24,10 @@ k8s-worker-node2
 
 [k8s_ssd]
 k8s-master
-k8s-worker-node1
+k8s-worker-node2
 
 [k8s_2T]
 k8s-worker-node2
-
 
 [crs]
 vatra
