@@ -97,6 +97,8 @@
     loop: "{{ hostvars['localhost']['groups']['k8s_2T'] }}"
     ignore_errors: True
 
+  - name: pause to move some images to other hosts if needed
+    pause: minutes=15
 
   - name: start {{item}}
     remote_user: root
@@ -107,4 +109,4 @@
 
 
   - name: give vhosts time to start
-    pause: minutes=5
+    pause: minutes=1
