@@ -107,4 +107,4 @@
 
 
   - name: give vhosts time to start
-    pause: minutes=1
+    pause: minutes=5
