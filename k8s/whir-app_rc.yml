@@ -1,18 +1,28 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: whir-app
 spec:
   replicas: 1
   selector:
-    tier: whir-app
+    matchLabels:
+      app: whir-app
   template:
     metadata:
       labels:
-        tier: whir-app
+        app: whir-app
     spec:
-#      nodeSelector:
-#        storagetype: ssd
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - whir-db
+            topologyKey: "kubernetes.io/hostname"
+
       containers:
 #      - name: data
 #        image: docker.ask4ua.com/whir-data

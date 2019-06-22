@@ -4,7 +4,7 @@ metadata:
   name: whir-db
 spec:
   selector:
-    tier: whir-db
+    app: whir-db
   type: NodePort
   ports:
     - port: 5432

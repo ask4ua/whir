@@ -1,19 +1,27 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: whir-db
 spec:
   replicas: 1
   selector:
-    tier: whir-db
+    matchLabels:
+      app: whir-db
   template:
     metadata:
       labels:
-        tier: whir-db
+        app: whir-db
     spec:
-      nodeSelector:
-        ramsize: 4plus
-        hddsize: 1tbplus
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: hddsize
+                operator: Gt
+                values:
+                - "1000"
+
       containers:
       - name: postgres
         env:
