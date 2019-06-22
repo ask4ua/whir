@@ -17,7 +17,7 @@
             chdir: /mnt/4T/virsh/images
     loop: "{{ hostvars['localhost']['groups']['k8s_ssd'] }}"
 
-   - name: copy default image for {{item}} from mnt-4T to mnt-8T
+  - name: copy default image for {{item}} from mnt-4T to mnt-8T
     remote_user: root
     become: yes
     become_method: sudo
