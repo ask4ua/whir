@@ -20,7 +20,7 @@ spec:
               - key: hddsize
                 operator: Gt
                 values:
-                - "1000"
+                - "10"
 
       containers:
       - name: postgres

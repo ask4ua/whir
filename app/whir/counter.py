@@ -12,8 +12,8 @@ class text_unification:
     # [0] separator is used to add to the end of line for sure
 
     block_separators = ['\n','\t']
-    sentense_separators = ['.','!','?','...',':',';','(',')','{','}','[',']','\"','\'']
-    phrase_separators = [',','- ']
+    sentense_separators = ['.','!','?']
+    phrase_separators = [',','- ','...',':',';','(',')','{','}','[',']','\"','\'']
     words_in_phrase_separators = [' ']
 
     separators=[block_separators,sentense_separators,phrase_separators,words_in_phrase_separators]
@@ -400,8 +400,8 @@ if __name__== '__main__':
     #starting selftest
     logger.debug("Starting Self Unit Tests")
 
-    from junit import Text as text
-    from junit import Decomposition as golden_decomposition
+    from tests_unit import Text as text
+    from tests_unit import Decomposition as golden_decomposition
 
     check_message=message(text)
     check_message.decompose()
