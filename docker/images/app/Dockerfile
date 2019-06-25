@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 
+FROM ubuntu:18.04
 VOLUME /app 
 VOLUME /data
 ENV TZ=Europe/Kiev
@@ -8,3 +8,5 @@ RUN pip3 install docker-py
 RUN pip3 install psycopg2
 COPY ./app/ /app/
 CMD /app/cycle.sh
+ARG version=0.0
+LABEL version=${version}
