@@ -295,7 +295,7 @@ class word(id_management):
                     submessages = text_unification.just_split(self.unified_text, separators)
 
                 else:
-                    elif decomposing_level==3:
+                    if decomposing_level==3:
                         self.type='word'
 
                     else:
