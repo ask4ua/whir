@@ -290,10 +290,11 @@ class word(id_management):
                     self.type = 'sentense'
                     submessages = text_unification.just_split(self.unified_text, separators)
 
-                else:
-                    if decomposing_level==2:
-                        self.type = 'phrase'
+                elif decomposing_level==2:
+                    self.type = 'phrase'
+                    submessages = text_unification.just_split(self.unified_text, separators)
 
+                else:
                     elif decomposing_level==3:
                         self.type='word'
 
